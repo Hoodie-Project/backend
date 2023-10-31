@@ -22,10 +22,6 @@ export class UserEntity {
   status: UserStatus;
 
   @CreateDateColumn()
-<<<<<<< Updated upstream
-  created_at;
-=======
->>>>>>> Stashed changes
   createdAt: Date;
 
   @UpdateDateColumn()
