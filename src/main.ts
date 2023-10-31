@@ -11,7 +11,13 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   const port = serverConfig.port;
 
+  // swagger 연결
   SwaggerModule.setup('api', app, document);
+
+  // base API 설정
+  app.setGlobalPrefix('api');
+
+  // port 연결
   await app.listen(port);
 }
 
