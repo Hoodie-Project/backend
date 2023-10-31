@@ -3,6 +3,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { UserStatus } from '../types/user-status';
 
@@ -21,5 +22,12 @@ export class UserEntity {
   status: UserStatus;
 
   @CreateDateColumn()
+<<<<<<< Updated upstream
   created_at;
+=======
+>>>>>>> Stashed changes
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
