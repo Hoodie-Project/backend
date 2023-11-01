@@ -13,7 +13,7 @@ export class UserEntity {
   id: bigint;
 
   @Column()
-  uid: bigint;
+  uid: number;
 
   @Column()
   email: string;
