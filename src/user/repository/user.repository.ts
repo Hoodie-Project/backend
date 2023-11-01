@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { UserEntity } from '../entity/user.entity';
+import { UserProfileEntity } from '../entity/user-profile.entity';
+import { UserAccountEntity } from '../entity/user-account.entity';
 
 @Injectable()
 export class UserRepository {
-  private userRepository: Repository<UserEntity>;
+  private userProfileRepository: Repository<UserProfileEntity>;
+  private userAccountRepository: Repository<UserAccountEntity>;
 
   constructor(private readonly dataSource: DataSource) {
-    this.userRepository = this.dataSource.getRepository(UserEntity);
+    this.userProfileRepository =
+      this.dataSource.getRepository(UserProfileEntity);
+    this.userAccountRepository =
+      this.dataSource.getRepository(UserAccountEntity);
   }
 }
