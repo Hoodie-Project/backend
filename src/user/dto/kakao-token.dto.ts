@@ -1,9 +1,9 @@
-export class KakaoDto {
-  token_type: string;
-  access_token: string;
-  id_token: string;
-  expires_in: number;
-  refresh_token: string;
-  refresh_token_expires_in: number;
+export class KakaoTokenDto {
+  tokenType: string;
+  accessToken: string;
+  idToken: string;
+  expiresIn: number;
+  refreshToken: string;
+  refreshTokenExpiresIn: number;
   scope: string;
 }

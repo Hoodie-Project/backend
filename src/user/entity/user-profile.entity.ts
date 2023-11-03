@@ -18,6 +18,9 @@ export class UserProfileEntity {
   @Column()
   image: string;
 
+  @Column()
+  birthDate: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

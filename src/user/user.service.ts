@@ -1,46 +1,69 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserRepository } from './repository/user.repository';
-import { KakaoDto } from './dto/kakao-token.dto';
+import { KakaoTokenDto } from './dto/kakao-token.dto';
 import axios from 'axios';
-import * as qs from 'qs';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {
   private userRepository: UserRepository;
 
-  async kakaoGetUserInfo(kakaoDto: KakaoDto) {
-    return await this.userRepository.getUserInfo(kakaoDto);
+  constructor(private readonly authService: AuthService) {}
+
+  /**
+   * function: 카카오톡 OAUTH 로그인 로직
+   * @param kakaoTokenDto: 카카오 토큰 객체
+   */
+  async kakaoSignIn(kakaoTokenDto: KakaoTokenDto) {
+    const { accessToken, refreshToken, idToken } = kakaoTokenDto;
+
+    // id token 유효성 검증
+    await this.authService.validateKakaoIdToken(idToken);
+
+    // id token 에서 사용자 정보 반환
+    const userInfo = await this.getKakaoUserInfo(accessToken);
+    const { sub } = userInfo;
+
+    // 가입 회원 확인 여부
+    const user = await this.userRepository.getUserByUID(sub);
+
+    if (user.uid !== sub) {
+      // 회원 가입 처리
+      this.registerUser(accessToken, refreshToken);
+    }
   }
 
-  async kakaoSignIn(kakaoDto: KakaoDto) {
-    return this.userRepository.kakaoSignIn(kakaoDto);
+  /**
+   * function: 회원 정보 반환
+   * @param accessToken
+   * @returns
+   */
+  async getKakaoUserInfo(accessToken: string) {
+    if (!accessToken) {
+      throw new BadRequestException('No accessToken provided');
+    }
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    };
+
+    try {
+      const response = await axios.get(process.env.KAKAO_USERINFO_URL, config);
+      const { sub, nickname, picture, email, birthdate } = response.data;
+      return { sub, nickname, picture, email, birthdate };
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  // async kakaoGetTokens(code: string) {
-  //   const body = {
-  //     grant_type: 'authorization_code',
-  //     client_id: process.env.KAKAO_CLIENT_ID,
-  //     redirect_uri: `http://localhost:4000/api/user/hello`,
-  //     code,
-  //   };
+  async registerUser(accessToken: string, refreshToken: string) {
+    const userInfo = await this.getKakaoUserInfo(accessToken);
+    const { sub, nickname, picture, email, birthdate } = userInfo;
 
-  //   const headers = {
-  //     'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
-  //   };
-
-  //   try {
-  //     const response = await axios({
-  //       method: 'POST',
-  //       url: 'https://kauth.kakao.com/oauth/token',
-  //       timeout: 30000,
-  //       headers,
-  //       data: qs.stringify(body),
-  //     });
-
-  //     console.log(response);
-  //     return response;
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
+    // 사용자 정보 저장
+    await this.userRepository.insertAccountInfo(sub, refreshToken, email);
+    await this.userRepository.insertProfileInfo(nickname, picture, birthdate);
+  }
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { UserProfileEntity } from '../entity/user-profile.entity';
 import { UserAccountEntity } from '../entity/user-account.entity';
-import { KakaoDto } from '../dto/kakao-token.dto';
+import { KakaoTokenDto } from '../dto/kakao-token.dto';
 import axios from 'axios';
 
 @Injectable()
@@ -17,22 +17,30 @@ export class UserRepository {
       this.dataSource.getRepository(UserAccountEntity);
   }
 
-  async kakaoSignIn(kakaoDto: KakaoDto) {
-    try {
-      const { id_token } = kakaoDto;
-    } catch (error) {}
+  async insertAccountInfo(sub: string, refreshToken: string, email: string) {
+    await this.userAccountRepository.save({
+      uid: sub,
+      refreshToken,
+      email,
+    });
   }
 
-  async getUserInfo(kakaoDto: KakaoDto) {
-    const { access_token, id_token } = kakaoDto;
-    const headers = {
-      Authorization: `Bearer ${access_token}`,
-    };
+  async insertProfileInfo(
+    nickname: string,
+    picture: string,
+    birthdate: string,
+  ) {
+    await this.userProfileRepository.save({
+      nickname,
+      image: picture,
+      birthdate,
+    });
+  }
 
-    try {
-      const response = await axios({
-        method: 'GET',
-      });
-    } catch (error) {}
+  async getUserByUID(sub: string) {
+    const user = await this.userAccountRepository.findOne({
+      where: { uid: sub },
+    });
+    return user;
   }
 }
