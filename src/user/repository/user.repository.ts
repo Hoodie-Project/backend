@@ -23,15 +23,10 @@ export class UserRepository {
     });
   }
 
-  async insertProfileInfo(
-    nickname: string,
-    picture: string,
-    birthdate: string,
-  ) {
+  async insertProfileInfo(nickname: string, picture: string) {
     await this.userProfileRepository.save({
       nickname,
       image: picture,
-      birthdate,
     });
   }
 

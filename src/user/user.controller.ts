@@ -25,20 +25,23 @@ export class UserController {
    *
    */
 
-  // https://kapi.kakao.com/v1/oidc/userinfo
   @Post('/signin/kakao')
   kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenDto) {
-    const { idToken } = kakaoTokenDto;
+    console.log('first', kakaoTokenDto);
+    const { idToken, accessToken } = kakaoTokenDto;
     try {
       this.userService.kakaoSignIn(kakaoTokenDto);
-      // const { validatedIdToken } =
+      // const { validatedIdToken }
       //   this.authService.validateKakaoIdToken(idToken);
 
       return {
         idToken: idToken,
+        accessToken: accessToken,
       };
     } catch (error) {
       console.log(error);
     }
   }
+
+  // @Post('/signin/google')
 }

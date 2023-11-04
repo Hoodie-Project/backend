@@ -31,9 +31,9 @@ export class UserService {
   }
 
   /**
-   * function: 회원 정보 반환
+   * function: 사용자 정보 반환
    * @param accessToken
-   * @returns
+   * @returns 사용자 정보
    */
   async getKakaoUserInfo(accessToken: string) {
     if (!accessToken) {
@@ -48,8 +48,8 @@ export class UserService {
 
     try {
       const response = await axios.get(process.env.KAKAO_USERINFO_URL, config);
-      const { sub, nickname, picture, email, birthdate } = response.data;
-      return { sub, nickname, picture, email, birthdate };
+      const { sub, nickname, picture, email } = response.data;
+      return { sub, nickname, picture, email };
     } catch (error) {
       console.log(error);
     }
@@ -57,9 +57,9 @@ export class UserService {
 
   async registerUser(accessToken: string, refreshToken: string) {
     const userInfo = await this.getKakaoUserInfo(accessToken);
-    const { sub, nickname, picture, email, birthdate } = userInfo;
+    const { sub, nickname, picture, email } = userInfo;
 
     await this.userRepository.insertAccountInfo(sub, refreshToken, email);
-    await this.userRepository.insertProfileInfo(nickname, picture, birthdate);
+    await this.userRepository.insertProfileInfo(nickname, picture);
   }
 }
