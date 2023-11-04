@@ -20,7 +20,9 @@ async function bootstrap() {
 
   // port 연결
   await app.listen(port);
-  logger.log(`Application successfully running on ${port}`);
+  logger.log(
+    `Application successfully running on ${process.env.NODE_ENV} PORT ${port}`,
+  );
 }
 
 bootstrap();

@@ -4,26 +4,29 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
-import { UserStatus } from '../types/user-status';
 
-@Entity()
-export class UserEntity {
+@Entity('profile')
+export class UserProfileEntity {
   @PrimaryGeneratedColumn()
   id: bigint;
 
   @Column()
-  uid: number;
+  nickname: string;
 
   @Column()
-  email: string;
+  image: string;
 
   @Column()
-  status: UserStatus;
+  birthDate: string;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

@@ -1,0 +1,69 @@
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { UserRepository } from './repository/user.repository';
+import { KakaoTokenDto } from './dto/kakao-token.dto';
+import axios from 'axios';
+import { AuthService } from 'src/auth/auth.service';
+
+@Injectable()
+export class UserService {
+  private userRepository: UserRepository;
+
+  constructor(private readonly authService: AuthService) {}
+
+  /**
+   * function: 카카오톡 OAUTH 로그인 로직
+   * @param kakaoTokenDto: 카카오 토큰 객체
+   */
+  async kakaoSignIn(kakaoTokenDto: KakaoTokenDto) {
+    const { accessToken, refreshToken, idToken } = kakaoTokenDto;
+
+    // id token 유효성 검증
+    await this.authService.validateKakaoIdToken(idToken);
+
+    // id token 에서 사용자 정보 반환
+    const userInfo = await this.getKakaoUserInfo(accessToken);
+    const { sub } = userInfo;
+
+    // 가입 회원 확인 여부
+    const user = await this.userRepository.getUserByUID(sub);
+
+    if (user.uid !== sub) {
+      // 회원 가입 처리
+      this.registerUser(accessToken, refreshToken);
+    }
+  }
+
+  /**
+   * function: 회원 정보 반환
+   * @param accessToken
+   * @returns
+   */
+  async getKakaoUserInfo(accessToken: string) {
+    if (!accessToken) {
+      throw new BadRequestException('No accessToken provided');
+    }
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    };
+
+    try {
+      const response = await axios.get(process.env.KAKAO_USERINFO_URL, config);
+      const { sub, nickname, picture, email, birthdate } = response.data;
+      return { sub, nickname, picture, email, birthdate };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async registerUser(accessToken: string, refreshToken: string) {
+    const userInfo = await this.getKakaoUserInfo(accessToken);
+    const { sub, nickname, picture, email, birthdate } = userInfo;
+
+    // 사용자 정보 저장
+    await this.userRepository.insertAccountInfo(sub, refreshToken, email);
+    await this.userRepository.insertProfileInfo(nickname, picture, birthdate);
+  }
+}
