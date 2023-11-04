@@ -13,18 +13,6 @@ export class UserController {
     };
   }
 
-  /**
-   * id token으로 사용자 정보 요청 및 로그인 처리
-   * 1. 토큰 객체를 받아서 id token을 가져오기
-   *  1-1. id token 유효성 검증하기
-   *  1-1. refreshToken 저장하기
-   * 2. id_token 안의 사용자 정보 받아오기 ----회원 확인 및 가입
-   *  2-1. 사용자 정보 저장하기
-   * 3. 로그인 처리
-   * 4. 로그아웃 처리
-   *
-   */
-
   @Post('/signin/kakao')
   kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenDto) {
     console.log('first', kakaoTokenDto);
