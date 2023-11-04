@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { UserProfileEntity } from '../entity/user-profile.entity';
 import { UserAccountEntity } from '../entity/user-account.entity';
-import { KakaoTokenDto } from '../dto/kakao-token.dto';
-import axios from 'axios';
 
 @Injectable()
 export class UserRepository {

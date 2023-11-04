@@ -1,12 +1,45 @@
-import { Injectable } from '@nestjs/common';
-import { KakaoTokenDto } from '../user/dto/kakao-token.dto';
-import { JwtService } from '@nestjs/jwt';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import axios from 'axios';
+import qs from 'qs';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly jwtService: JwtService) {}
+  async validateKakaoIdToken(idToken: string) {
+    // 토큰 헤더, 페이로드, 서명 분리
 
-  async validateKakaoIdToken(idToken: string) {}
+    // 페이로드 유효성 검증
+    this.validateKakaoPayload(idToken);
+
+    // 서명 유효성 검증
+    this.validateKakaoSignature();
+  }
+
+  async validateKakaoPayload(idToken: string) {
+    if (!idToken) {
+      throw new BadRequestException('No idToken provided');
+    }
+    console.log(idToken);
+
+    const headers = {
+      'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+    };
+
+    try {
+      const response = await axios({
+        method: 'POST',
+        url: process.env.KAKAO_TOKENINFO_URL,
+        timeout: 30000,
+        headers,
+        data: idToken,
+      });
+
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async validateKakaoSignature() {}
 
   /**
    * id token으로 사용자 정보 요청 및 로그인 처리

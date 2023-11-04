@@ -6,9 +6,10 @@ import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {
-  private userRepository: UserRepository;
-
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userRepository: UserRepository,
+  ) {}
 
   /**
    * function: 카카오톡 OAUTH 로그인 로직
@@ -17,18 +18,14 @@ export class UserService {
   async kakaoSignIn(kakaoTokenDto: KakaoTokenDto) {
     const { accessToken, refreshToken, idToken } = kakaoTokenDto;
 
-    // id token 유효성 검증
     await this.authService.validateKakaoIdToken(idToken);
 
-    // id token 에서 사용자 정보 반환
     const userInfo = await this.getKakaoUserInfo(accessToken);
     const { sub } = userInfo;
 
-    // 가입 회원 확인 여부
     const user = await this.userRepository.getUserByUID(sub);
 
     if (user.uid !== sub) {
-      // 회원 가입 처리
       this.registerUser(accessToken, refreshToken);
     }
   }
@@ -62,7 +59,6 @@ export class UserService {
     const userInfo = await this.getKakaoUserInfo(accessToken);
     const { sub, nickname, picture, email, birthdate } = userInfo;
 
-    // 사용자 정보 저장
     await this.userRepository.insertAccountInfo(sub, refreshToken, email);
     await this.userRepository.insertProfileInfo(nickname, picture, birthdate);
   }

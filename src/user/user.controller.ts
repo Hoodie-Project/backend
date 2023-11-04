@@ -1,14 +1,10 @@
 import { Controller, Post, Body, Get } from '@nestjs/common';
 import { UserService } from './user.service';
 import { KakaoTokenDto } from './dto/kakao-token.dto';
-import { AuthService } from 'src/auth/auth.service';
 
 @Controller('user')
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Get('/hello')
   sayHello() {
