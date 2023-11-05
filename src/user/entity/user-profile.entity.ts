@@ -10,8 +10,8 @@ import { UserAccountEntity } from './user-account.entity';
 
 @Entity('profile')
 export class UserProfileEntity {
-  @PrimaryGeneratedColumn()
-  id: bigint;
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id: number;
 
   @Column()
   nickname: string;
@@ -19,10 +19,10 @@ export class UserProfileEntity {
   @Column()
   image: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp with time zone' })
   updatedAt: Date;
 
   @OneToOne(() => UserAccountEntity, (account) => account.profile)
