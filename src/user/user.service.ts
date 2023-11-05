@@ -31,6 +31,36 @@ export class UserService {
     }
   }
 
+  async kakaoSignOut(accessToken: string, uid: string) {
+    if (!accessToken) {
+      throw new BadRequestException('No accessToken provided');
+    }
+
+    const headers = {
+      'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+    };
+
+    const body = {
+      target_id_type: 'user_id',
+      target_id: uid,
+    };
+
+    try {
+      const response = await axios({
+        method: 'POST',
+        url: process.env.KAKAO_SIGNOUT_URL,
+        timeout: 30000,
+        headers,
+        data: body,
+      });
+
+      console.log('hello', response);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   /**
    * function: 사용자 정보 반환
    * @param accessToken

@@ -43,11 +43,16 @@ export class UserController {
     }
   }
 
+  @Post('/signout/kakao')
+  kakaoSignOut(@Body() accessToken: string, uid: string) {
+    return this.userService.kakaoSignOut(accessToken, uid);
+  }
+
   @Patch('/:uid')
   @UsePipes(ValidationPipe)
   updateUser(@Param() uid: string, @Body() nickname: string) {
-    return this.userService.updateUser(uid, nickname);
-    // return 'Nickname has been updated';
+    this.userService.updateUser(uid, nickname);
+    return 'Nickname has been updated';
   }
 
   @Patch('/profile_image/:uid')
