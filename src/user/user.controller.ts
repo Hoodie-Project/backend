@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { KakaoTokenDto } from './dto/kakao-token.dto';
@@ -23,6 +25,7 @@ export class UserController {
   }
 
   @Post('/signin/kakao')
+  @UsePipes(ValidationPipe)
   kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenDto) {
     console.log('first', kakaoTokenDto);
     const { idToken, accessToken } = kakaoTokenDto;
@@ -41,12 +44,14 @@ export class UserController {
   }
 
   @Patch('/:uid')
+  @UsePipes(ValidationPipe)
   updateUser(@Param() uid: string, @Body() nickname: string) {
     return this.userService.updateUser(uid, nickname);
     // return 'Nickname has been updated';
   }
 
   @Patch('/profile_image/:uid')
+  @UsePipes(ValidationPipe)
   updateUserImage() {}
 
   @Delete('/:uid')
@@ -56,6 +61,7 @@ export class UserController {
   }
 
   @Post()
+  @UsePipes(ValidationPipe)
   createUser(@Body() testDto: TestDto) {
     this.userService.createUser(testDto);
   }
