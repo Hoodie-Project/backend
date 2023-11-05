@@ -29,6 +29,7 @@ export class UserService {
     if (user.uid !== sub) {
       this.registerUser(accessToken, refreshToken);
     }
+    return { accessToken, refreshToken, idToken };
   }
 
   async kakaoSignOut(accessToken: string, uid: string) {

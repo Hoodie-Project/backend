@@ -27,20 +27,7 @@ export class UserController {
   @Post('/signin/kakao')
   @UsePipes(ValidationPipe)
   kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenDto) {
-    console.log('first', kakaoTokenDto);
-    const { idToken, accessToken } = kakaoTokenDto;
-    try {
-      this.userService.kakaoSignIn(kakaoTokenDto);
-      // const { validatedIdToken }
-      //   this.authService.validateKakaoIdToken(idToken);
-
-      return {
-        idToken: idToken,
-        accessToken: accessToken,
-      };
-    } catch (error) {
-      console.log(error);
-    }
+    return this.userService.kakaoSignIn(kakaoTokenDto);
   }
 
   @Post('/signout/kakao')
