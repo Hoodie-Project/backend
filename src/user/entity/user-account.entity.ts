@@ -4,11 +4,11 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
   OneToOne,
   JoinColumn,
 } from 'typeorm';
 import { UserProfileEntity } from './user-profile.entity';
+import { AccountStatus } from '../types/account-status';
 
 @Entity('account')
 export class UserAccountEntity {
@@ -24,16 +24,16 @@ export class UserAccountEntity {
   @Column()
   email: string;
 
+  @Column({ default: AccountStatus.ACTIVE })
+  status: AccountStatus;
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn()
-  deletedAt: Date;
-
-  @OneToOne(() => UserProfileEntity)
+  @OneToOne(() => UserProfileEntity, (profile) => profile.account)
   @JoinColumn()
   profile: UserProfileEntity;
 }

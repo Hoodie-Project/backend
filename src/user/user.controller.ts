@@ -1,6 +1,15 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { KakaoTokenDto } from './dto/kakao-token.dto';
+import { TestDto } from './dto/user-profile.dto';
 
 @Controller('user')
 export class UserController {
@@ -31,5 +40,23 @@ export class UserController {
     }
   }
 
-  // @Post('/signin/google')
+  @Patch('/:uid')
+  updateUser(@Param() uid: string, @Body() nickname: string) {
+    return this.userService.updateUser(uid, nickname);
+    // return 'Nickname has been updated';
+  }
+
+  @Patch('/profile_image/:uid')
+  updateUserImage() {}
+
+  @Delete('/:uid')
+  deleteUser(@Param() uid: string) {
+    this.userService.deleteUser(uid);
+    return 'User has been deleted';
+  }
+
+  @Post()
+  createUser(@Body() testDto: TestDto) {
+    this.userService.createUser(testDto);
+  }
 }
