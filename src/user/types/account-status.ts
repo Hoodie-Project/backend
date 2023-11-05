@@ -1,4 +1,4 @@
-export enum UserStatus {
+export enum AccountStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   DELETED = 'deleted',

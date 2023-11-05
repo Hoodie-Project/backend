@@ -1,6 +1,17 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Patch,
+  Param,
+  Delete,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { KakaoTokenDto } from './dto/kakao-token.dto';
+import { TestDto } from './dto/user-profile.dto';
 
 @Controller('user')
 export class UserController {
@@ -14,22 +25,36 @@ export class UserController {
   }
 
   @Post('/signin/kakao')
+  @UsePipes(ValidationPipe)
   kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenDto) {
-    console.log('first', kakaoTokenDto);
-    const { idToken, accessToken } = kakaoTokenDto;
-    try {
-      this.userService.kakaoSignIn(kakaoTokenDto);
-      // const { validatedIdToken }
-      //   this.authService.validateKakaoIdToken(idToken);
-
-      return {
-        idToken: idToken,
-        accessToken: accessToken,
-      };
-    } catch (error) {
-      console.log(error);
-    }
+    return this.userService.kakaoSignIn(kakaoTokenDto);
   }
 
-  // @Post('/signin/google')
+  @Post('/signout/kakao')
+  kakaoSignOut(@Body() accessToken: string, uid: string) {
+    return this.userService.kakaoSignOut(accessToken, uid);
+  }
+
+  @Patch('/:uid')
+  @UsePipes(ValidationPipe)
+  updateUser(@Param() uid: string, @Body() nickname: string) {
+    this.userService.updateUser(uid, nickname);
+    return 'Nickname has been updated';
+  }
+
+  @Patch('/profile_image/:uid')
+  @UsePipes(ValidationPipe)
+  updateUserImage() {}
+
+  @Delete('/:uid')
+  deleteUser(@Param() uid: string) {
+    this.userService.deleteUser(uid);
+    return 'User has been deleted';
+  }
+
+  @Post()
+  @UsePipes(ValidationPipe)
+  createUser(@Body() testDto: TestDto) {
+    this.userService.createUser(testDto);
+  }
 }

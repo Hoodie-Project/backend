@@ -4,8 +4,9 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
+  OneToOne,
 } from 'typeorm';
+import { UserAccountEntity } from './user-account.entity';
 
 @Entity('profile')
 export class UserProfileEntity {
@@ -24,6 +25,6 @@ export class UserProfileEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn()
-  deletedAt: Date;
+  @OneToOne(() => UserAccountEntity, (account) => account.profile)
+  account: UserAccountEntity;
 }

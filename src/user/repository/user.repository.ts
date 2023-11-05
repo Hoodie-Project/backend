@@ -36,4 +36,15 @@ export class UserRepository {
     });
     return user;
   }
+
+  async updateUserInfoByUID(uid: string, nickname: string) {
+    const user = await this.getUserByUID(uid);
+    user.profile.nickname;
+    await this.userProfileRepository.save({ nickname });
+  }
+
+  async deleteUserByUID(uid: string) {
+    const user = await this.userAccountRepository.softDelete({ uid });
+    await this.userProfileRepository.softDelete(uid);
+  }
 }

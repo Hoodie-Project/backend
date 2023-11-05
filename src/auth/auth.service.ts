@@ -44,6 +44,7 @@ export class AuthService {
     const headers = {
       'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
     };
+
     try {
       const response = await axios({
         method: 'POST',
@@ -54,7 +55,7 @@ export class AuthService {
       });
 
       console.log('hello', response);
-      return response;
+      return response.data;
     } catch (error) {
       console.log(error);
     }

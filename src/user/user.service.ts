@@ -3,6 +3,7 @@ import { UserRepository } from './repository/user.repository';
 import { KakaoTokenDto } from './dto/kakao-token.dto';
 import axios from 'axios';
 import { AuthService } from 'src/auth/auth.service';
+import { TestDto } from './dto/user-profile.dto';
 
 @Injectable()
 export class UserService {
@@ -27,6 +28,37 @@ export class UserService {
 
     if (user.uid !== sub) {
       this.registerUser(accessToken, refreshToken);
+    }
+    return { accessToken, refreshToken, idToken };
+  }
+
+  async kakaoSignOut(accessToken: string, uid: string) {
+    if (!accessToken) {
+      throw new BadRequestException('No accessToken provided');
+    }
+
+    const headers = {
+      'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+    };
+
+    const body = {
+      target_id_type: 'user_id',
+      target_id: uid,
+    };
+
+    try {
+      const response = await axios({
+        method: 'POST',
+        url: process.env.KAKAO_SIGNOUT_URL,
+        timeout: 30000,
+        headers,
+        data: body,
+      });
+
+      console.log('hello', response);
+      return response.data;
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -59,7 +91,22 @@ export class UserService {
     const userInfo = await this.getKakaoUserInfo(accessToken);
     const { sub, nickname, picture, email } = userInfo;
 
-    await this.userRepository.insertAccountInfo(sub, refreshToken, email);
     await this.userRepository.insertProfileInfo(nickname, picture);
+    await this.userRepository.insertAccountInfo(sub, refreshToken, email);
+  }
+
+  async updateUser(uid: string, nickname: string) {
+    await this.userRepository.updateUserInfoByUID(uid, nickname);
+  }
+
+  async deleteUser(uid: string) {
+    await this.userRepository.deleteUserByUID(uid);
+  }
+
+  async createUser(testDto: TestDto) {
+    const { uid, refreshToken, email, nickname, image } = testDto;
+    console.log(image);
+    await this.userRepository.insertProfileInfo(nickname, image);
+    await this.userRepository.insertAccountInfo(uid, refreshToken, email);
   }
 }
