@@ -91,8 +91,17 @@ export class UserService {
     const userInfo = await this.getKakaoUserInfo(accessToken);
     const { sub, nickname, picture, email } = userInfo;
 
-    await this.userRepository.insertProfileInfo(nickname, picture);
-    await this.userRepository.insertAccountInfo(sub, refreshToken, email);
+    const userProfileEntity = await this.userRepository.insertProfileInfo(
+      nickname,
+      picture,
+    );
+
+    await this.userRepository.insertAccountInfo(
+      sub,
+      refreshToken,
+      email,
+      userProfileEntity,
+    );
   }
 
   async updateUser(uid: string, nickname: string) {
@@ -105,8 +114,21 @@ export class UserService {
 
   async createUser(testDto: TestDto) {
     const { uid, refreshToken, email, nickname, image } = testDto;
-    console.log(image);
-    await this.userRepository.insertProfileInfo(nickname, image);
-    await this.userRepository.insertAccountInfo(uid, refreshToken, email);
+
+    const userProfileEntity = await this.userRepository.insertProfileInfo(
+      nickname,
+      image,
+    );
+
+    await this.userRepository.insertAccountInfo(
+      uid,
+      refreshToken,
+      email,
+      userProfileEntity,
+    );
+  }
+
+  async testGetUser(sub: string) {
+    await this.userRepository.getUserByUID(sub);
   }
 }

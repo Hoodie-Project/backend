@@ -31,13 +31,13 @@ export class UserController {
   }
 
   @Post('/signout/kakao')
-  kakaoSignOut(@Body() accessToken: string, uid: string) {
+  kakaoSignOut(@Body('accessToken, uid') accessToken: string, uid: string) {
     return this.userService.kakaoSignOut(accessToken, uid);
   }
 
   @Patch('/:uid')
   @UsePipes(ValidationPipe)
-  updateUser(@Param() uid: string, @Body() nickname: string) {
+  updateUser(@Param('uid') uid: string, @Body('nickname') nickname: string) {
     this.userService.updateUser(uid, nickname);
     return 'Nickname has been updated';
   }
@@ -47,7 +47,7 @@ export class UserController {
   updateUserImage() {}
 
   @Delete('/:uid')
-  deleteUser(@Param() uid: string) {
+  deleteUser(@Param('uid') uid: string) {
     this.userService.deleteUser(uid);
     return 'User has been deleted';
   }
@@ -56,5 +56,10 @@ export class UserController {
   @UsePipes(ValidationPipe)
   createUser(@Body() testDto: TestDto) {
     this.userService.createUser(testDto);
+  }
+
+  @Get()
+  testGetUser(@Param('sub') sub: string) {
+    this.userService.testGetUser(sub);
   }
 }

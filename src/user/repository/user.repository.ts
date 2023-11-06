@@ -15,26 +15,34 @@ export class UserRepository {
       this.dataSource.getRepository(UserAccountEntity);
   }
 
-  async insertAccountInfo(sub: string, refreshToken: string, email: string) {
+  async insertAccountInfo(
+    uid: string,
+    refreshToken: string,
+    email: string,
+    profile: UserProfileEntity,
+  ) {
     await this.userAccountRepository.save({
-      uid: sub,
+      uid,
       refreshToken,
       email,
+      profile,
     });
   }
 
-  async insertProfileInfo(nickname: string, picture: string) {
-    await this.userProfileRepository.save({
+  async insertProfileInfo(nickname: string, image: string) {
+    return this.userProfileRepository.save({
       nickname,
-      image: picture,
+      image,
     });
   }
 
-  async getUserByUID(sub: string) {
-    const user = await this.userAccountRepository.findOne({
-      where: { uid: sub },
+  async getUserByUID(uid: string) {
+    return this.userAccountRepository.findOne({
+      where: { uid },
+      relations: {
+        profile: true,
+      },
     });
-    return user;
   }
 
   async updateUserInfoByUID(uid: string, nickname: string) {
