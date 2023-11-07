@@ -8,6 +8,8 @@ import {
   Delete,
   UsePipes,
   ValidationPipe,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { KakaoTokenDto } from './dto/kakao-token.dto';
@@ -37,8 +39,17 @@ export class UserController {
   @Patch('/:uid')
   @UsePipes(ValidationPipe)
   updateUser(@Param('uid') uid: string, @Body('nickname') nickname: string) {
-    this.userService.updateUser(uid, nickname);
-    return 'Nickname has been updated';
+    try {
+      const userInfo = this.userService.updateUser(uid, nickname);
+      if (userInfo) {
+        return 'User information has been updated';
+      }
+    } catch (error) {
+      throw new HttpException(
+        'Failed to update user information',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Patch('/profile_image/:uid')
@@ -47,8 +58,17 @@ export class UserController {
 
   @Delete('/:uid')
   deleteUser(@Param('uid') uid: string) {
-    this.userService.deleteUser(uid);
-    return 'User has been deleted';
+    try {
+      const user = this.userService.deleteUser(uid);
+      if (user) {
+        return 'User has been deleted';
+      }
+    } catch (error) {
+      throw new HttpException(
+        'Failed to delete user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   // @Post()
@@ -58,7 +78,7 @@ export class UserController {
   // }
 
   @Get('/info')
-  GetUserInfo(@Param('uid') uid: string) {
-    return this.userService.GetUserInfo(uid);
+  getUserInfo(@Param('uid') uid: string) {
+    return this.userService.getUserInfo(uid);
   }
 }

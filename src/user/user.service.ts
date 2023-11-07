@@ -127,7 +127,7 @@ export class UserService {
   //   );
   // }
 
-  async GetUserInfo(uid: string) {
+  async getUserInfo(uid: string) {
     return await this.userRepository.getUserByUID(uid);
   }
 }
