@@ -1,0 +1,11 @@
+# development
+FROM node:20.8.1 AS development
+WORKDIR /usr/src/
+VOLUME [ "/Users/src/hoodieplan" ]
+COPY package*.json ./
+
+RUN npm install
+EXPOSE 4000
+
+CMD ["npm", "run", "start:dev"]
+
