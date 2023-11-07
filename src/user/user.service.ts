@@ -3,7 +3,6 @@ import { UserRepository } from './repository/user.repository';
 import { KakaoTokenDto } from './dto/kakao-token.dto';
 import axios from 'axios';
 import { AuthService } from 'src/auth/auth.service';
-import { TestDto } from './dto/user-profile.dto';
 
 @Injectable()
 export class UserService {
@@ -112,23 +111,23 @@ export class UserService {
     await this.userRepository.deleteUserByUID(uid);
   }
 
-  async createUser(testDto: TestDto) {
-    const { uid, refreshToken, email, nickname, image } = testDto;
+  // async createUser(testDto: TestDto) {
+  //   const { uid, refreshToken, email, nickname, image } = testDto;
 
-    const userProfileEntity = await this.userRepository.insertProfileInfo(
-      nickname,
-      image,
-    );
+  //   const userProfileEntity = await this.userRepository.insertProfileInfo(
+  //     nickname,
+  //     image,
+  //   );
 
-    await this.userRepository.insertAccountInfo(
-      uid,
-      refreshToken,
-      email,
-      userProfileEntity,
-    );
-  }
+  //   await this.userRepository.insertAccountInfo(
+  //     uid,
+  //     refreshToken,
+  //     email,
+  //     userProfileEntity,
+  //   );
+  // }
 
-  async testGetUser(uid: string) {
+  async getUserInfo(uid: string) {
     return await this.userRepository.getUserByUID(uid);
   }
 }
