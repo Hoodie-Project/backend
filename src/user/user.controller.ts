@@ -58,8 +58,8 @@ export class UserController {
     this.userService.createUser(testDto);
   }
 
-  @Get()
-  testGetUser(@Param('sub') sub: string) {
-    this.userService.testGetUser(sub);
+  @Get('/info')
+  testGetUser(@Param('uid') uid: string) {
+    return this.userService.testGetUser(uid);
   }
 }

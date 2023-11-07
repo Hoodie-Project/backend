@@ -128,7 +128,7 @@ export class UserService {
     );
   }
 
-  async testGetUser(sub: string) {
-    await this.userRepository.getUserByUID(sub);
+  async testGetUser(uid: string) {
+    return await this.userRepository.getUserByUID(uid);
   }
 }
