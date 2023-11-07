@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { KakaoTokenDto } from './dto/kakao-token.dto';
-import { TestDto } from './dto/user-profile.dto';
 
 @Controller('user')
 export class UserController {
@@ -52,14 +51,14 @@ export class UserController {
     return 'User has been deleted';
   }
 
-  @Post()
-  @UsePipes(ValidationPipe)
-  createUser(@Body() testDto: TestDto) {
-    this.userService.createUser(testDto);
-  }
+  // @Post()
+  // @UsePipes(ValidationPipe)
+  // createUser(@Body() testDto: TestDto) {
+  //   this.userService.createUser(testDto);
+  // }
 
   @Get('/info')
-  testGetUser(@Param('uid') uid: string) {
-    return this.userService.testGetUser(uid);
+  GetUserInfo(@Param('uid') uid: string) {
+    return this.userService.GetUserInfo(uid);
   }
 }
