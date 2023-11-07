@@ -12,8 +12,8 @@ import { AccountStatus } from '../types/account-status';
 
 @Entity('account')
 export class UserAccountEntity {
-  @PrimaryGeneratedColumn()
-  id: bigint;
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id: number;
 
   @Column()
   uid: string;
@@ -27,10 +27,10 @@ export class UserAccountEntity {
   @Column({ default: AccountStatus.ACTIVE })
   status: AccountStatus;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp with time zone' })
   updatedAt: Date;
 
   @OneToOne(() => UserProfileEntity, (profile) => profile.account)
