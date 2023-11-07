@@ -46,9 +46,10 @@ export class UserRepository {
   }
 
   async updateUserInfoByUID(uid: string, nickname: string) {
-    const user = await this.getUserByUID(uid);
-    user.profile.nickname;
-    await this.userProfileRepository.save({ nickname });
+    const { profile } = await this.getUserByUID(uid);
+    const id = profile.id as number;
+
+    await this.userProfileRepository.update(id, { nickname });
   }
 
   async deleteUserByUID(uid: string) {
