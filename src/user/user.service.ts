@@ -3,6 +3,7 @@ import { UserRepository } from '@src/user/repository/user.repository';
 import { KakaoTokenDto } from '@src/user/dto/kakao-token.dto';
 import { AuthService } from '@src/auth/auth.service';
 import axios from 'axios';
+import { AccountStatus } from './types/account-status';
 
 @Injectable()
 export class UserService {
@@ -36,11 +37,11 @@ export class UserService {
       throw new BadRequestException('No accessToken provided');
     }
 
-    const headers = {
+    const reqHeaders = {
       'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
     };
 
-    const body = {
+    const reqBody = {
       target_id_type: 'user_id',
       target_id: uid,
     };
@@ -50,14 +51,14 @@ export class UserService {
         method: 'POST',
         url: process.env.KAKAO_SIGNOUT_URL,
         timeout: 30000,
-        headers,
-        data: body,
+        headers: reqHeaders,
+        data: reqBody,
       });
 
       console.log('hello', response);
       return response.data;
     } catch (error) {
-      console.log(error);
+      throw new BadRequestException('Failed to sign out');
     }
   }
 
@@ -82,7 +83,7 @@ export class UserService {
       const { sub, nickname, picture, email } = response.data;
       return { sub, nickname, picture, email };
     } catch (error) {
-      console.log(error);
+      throw new BadRequestException('Failed to get user information');
     }
   }
 
@@ -104,11 +105,21 @@ export class UserService {
   }
 
   async updateUser(uid: string, nickname: string) {
-    await this.userRepository.updateUserInfoByUID(uid, nickname);
+    const { status, profile } = await this.userRepository.getUserByUID(uid);
+    const id = profile.id as number;
+
+    if (status === AccountStatus.ACTIVE) {
+      await this.userRepository.updateUserInfoByUID(id, nickname);
+    }
   }
 
   async deleteUser(uid: string) {
-    await this.userRepository.deleteUserByUID(uid);
+    const user = await this.userRepository.getUserByUID(uid);
+    const existedUID = user.uid;
+
+    if (uid === existedUID) {
+      await this.userRepository.deleteUserByUID(uid);
+    }
   }
 
   // async createUser(testDto: TestDto) {

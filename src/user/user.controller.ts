@@ -8,8 +8,6 @@ import {
   Delete,
   UsePipes,
   ValidationPipe,
-  HttpException,
-  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from '@src/user/user.service';
 import { KakaoTokenDto } from '@src/user/dto/kakao-token.dto';
