@@ -13,7 +13,7 @@ export class AuthController {
 
   @Post()
   @UsePipes(ValidationPipe)
-  tokenValidation(@Body() idToken) {
+  tokenValidation(@Body('idToken') idToken: string) {
     return this.authService.validateKakaoIdToken(idToken);
   }
 }

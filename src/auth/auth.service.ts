@@ -1,13 +1,17 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { UserRepository } from '@src/user/repository/user.repository';
 import axios from 'axios';
 
 @Injectable()
 export class AuthService {
+  private readonly userRepository: UserRepository;
   async validateKakaoIdToken(idToken) {
     // 토큰 헤더, 페이로드, 서명 분리
-    const { id_token } = idToken;
-    console.log(id_token);
-    const [header, payload, signature]: string[] = id_token.split('.');
+    const [header, payload, signature]: string[] = idToken.split('.');
 
     // 페이로드 유효성 검증
     await this.validateKakaoPayload(payload);
@@ -32,6 +36,20 @@ export class AuthService {
 
     const { iss, aud, exp, nonce } = parsedPayload;
 
+    if (iss !== process.env.KAKAO_ISSUER) {
+      throw new UnauthorizedException('Wrong issuer');
+    }
+
+    if (aud !== process.env.KAKAO_CLIENT_ID) {
+      throw new UnauthorizedException('Wrong client key');
+    }
+
+    if (exp) {
+    }
+
+    if (!nonce) {
+      throw new UnauthorizedException('Nonce required');
+    }
     // 토큰 정보 요청
     const tokenInfo = await this.getIdTokenInfo(payload);
   }
