@@ -48,17 +48,7 @@ export class UserController {
 
   @Delete('/:uid')
   deleteUser(@Param('uid') uid: string) {
-    try {
-      const user = this.userService.deleteUser(uid);
-      if (user) {
-        return 'User has been deleted';
-      }
-    } catch (error) {
-      throw new HttpException(
-        'Failed to delete user',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    return this.userService.deleteUser(uid);
   }
 
   // @Post()
