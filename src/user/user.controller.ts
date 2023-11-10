@@ -11,8 +11,8 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { UserService } from './user.service';
-import { KakaoTokenDto } from './dto/kakao-token.dto';
+import { UserService } from '@src/user/user.service';
+import { KakaoTokenDto } from '@src/user/dto/kakao-token.dto';
 
 @Controller('user')
 export class UserController {
