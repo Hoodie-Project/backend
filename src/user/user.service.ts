@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { UserRepository } from './repository/user.repository';
-import { KakaoTokenDto } from './dto/kakao-token.dto';
+import { UserRepository } from '@src/user/repository/user.repository';
+import { KakaoTokenDto } from '@src/user/dto/kakao-token.dto';
+import { AuthService } from '@src/auth/auth.service';
 import axios from 'axios';
-import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {

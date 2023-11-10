@@ -1,8 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { UserProfileEntity } from '../entity/user-profile.entity';
-import { UserAccountEntity } from '../entity/user-account.entity';
-import { AccountStatus } from '../types/account-status';
+import { UserProfileEntity } from '@src/user/entity/user-profile.entity';
+import { UserAccountEntity } from '@src/user/entity/user-account.entity';
+import { AccountStatus } from '@src/user/types/account-status';
 
 @Injectable()
 export class UserRepository {
@@ -47,32 +47,24 @@ export class UserRepository {
   }
 
   async updateUserInfoByUID(uid: string, nickname: string) {
-    try {
-      const { status, profile } = await this.getUserByUID(uid);
-      const id = profile.id as number;
+    const { status, profile } = await this.getUserByUID(uid);
+    const id = profile.id as number;
 
-      if (status === AccountStatus.ACTIVE) {
-        await this.userProfileRepository.update(id, { nickname });
-      }
-    } catch (error) {
-      throw new InternalServerErrorException('This user is not activated');
+    if (status === AccountStatus.ACTIVE) {
+      await this.userProfileRepository.update(id, { nickname });
     }
   }
 
   async deleteUserByUID(uid: string) {
-    try {
-      const user = await this.getUserByUID(uid);
-      const existedUID = user.uid;
-      if (uid === existedUID) {
-        await this.userAccountRepository.update(
-          { uid: uid },
-          {
-            status: AccountStatus.INACTIVE,
-          },
-        );
-      }
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to delete user');
+    const user = await this.getUserByUID(uid);
+    const existedUID = user.uid;
+    if (uid === existedUID) {
+      await this.userAccountRepository.update(
+        { uid: uid },
+        {
+          status: AccountStatus.INACTIVE,
+        },
+      );
     }
   }
 }

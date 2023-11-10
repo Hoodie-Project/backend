@@ -1,15 +1,20 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from '@src/app.module';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule } from '@nestjs/swagger';
-import { swaggerConfig } from 'config/swagger.config';
+import { moduleOptions, swaggerConfig } from 'config/swagger.config';
 import { Logger } from '@nestjs/common';
+import { corsOption } from 'config/cors.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   const logger = new Logger();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  const document = SwaggerModule.createDocument(
+    app,
+    swaggerConfig,
+    moduleOptions,
+  );
   const port = configService.get('PORT') || 8000;
 
   // swagger 연결
@@ -17,6 +22,7 @@ async function bootstrap() {
 
   // base API 설정
   app.setGlobalPrefix('api');
+  app.enableCors(corsOption);
 
   // port 연결
   await app.listen(port);
