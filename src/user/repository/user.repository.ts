@@ -47,32 +47,24 @@ export class UserRepository {
   }
 
   async updateUserInfoByUID(uid: string, nickname: string) {
-    try {
-      const { status, profile } = await this.getUserByUID(uid);
-      const id = profile.id as number;
+    const { status, profile } = await this.getUserByUID(uid);
+    const id = profile.id as number;
 
-      if (status === AccountStatus.ACTIVE) {
-        await this.userProfileRepository.update(id, { nickname });
-      }
-    } catch (error) {
-      throw new InternalServerErrorException('This user is not activated');
+    if (status === AccountStatus.ACTIVE) {
+      await this.userProfileRepository.update(id, { nickname });
     }
   }
 
   async deleteUserByUID(uid: string) {
-    try {
-      const user = await this.getUserByUID(uid);
-      const existedUID = user.uid;
-      if (uid === existedUID) {
-        await this.userAccountRepository.update(
-          { uid: uid },
-          {
-            status: AccountStatus.INACTIVE,
-          },
-        );
-      }
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to delete user');
+    const user = await this.getUserByUID(uid);
+    const existedUID = user.uid;
+    if (uid === existedUID) {
+      await this.userAccountRepository.update(
+        { uid: uid },
+        {
+          status: AccountStatus.INACTIVE,
+        },
+      );
     }
   }
 }

@@ -39,17 +39,7 @@ export class UserController {
   @Patch('/:uid')
   @UsePipes(ValidationPipe)
   updateUser(@Param('uid') uid: string, @Body('nickname') nickname: string) {
-    try {
-      const userInfo = this.userService.updateUser(uid, nickname);
-      if (userInfo) {
-        return 'User information has been updated';
-      }
-    } catch (error) {
-      throw new HttpException(
-        'Failed to update user information',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    return this.userService.updateUser(uid, nickname);
   }
 
   @Patch('/profile_image/:uid')
