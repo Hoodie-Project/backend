@@ -1,46 +1,59 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserRepository } from '@src/user/repository/user.repository';
 import { KakaoTokenDto } from '@src/user/dto/kakao-token.dto';
 import { AuthService } from '@src/auth/auth.service';
 import axios from 'axios';
+import { AccountStatus } from './types/account-status';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly authService: AuthService,
-    private readonly userRepository: UserRepository,
+    private userRepository: UserRepository,
   ) {}
 
   /**
-   * function: 카카오톡 OAUTH 로그인 로직
-   * @param kakaoTokenDto: 카카오 토큰 객체
+   * function: 카카오톡 OAUTH 메인 로그인
+   * @param kakaoTokenDto 카카오 요청 토큰 객체
+   * @returns accessToken, refreshToken, idToken
    */
   async kakaoSignIn(kakaoTokenDto: KakaoTokenDto) {
     const { accessToken, refreshToken, idToken } = kakaoTokenDto;
 
     await this.authService.validateKakaoIdToken(idToken);
 
-    const userInfo = await this.getKakaoUserInfo(accessToken);
-    const { sub } = userInfo;
+    const { sub } = await this.getKakaoUserInfo(accessToken);
+    const { uid } = await this.userRepository.getUserByUID(sub);
 
-    const user = await this.userRepository.getUserByUID(sub);
-
-    if (user.uid !== sub) {
+    // 회원 가입 처리
+    if (uid !== sub) {
       this.registerUser(accessToken, refreshToken);
     }
+
+    // 로그인 처리
     return { accessToken, refreshToken, idToken };
   }
 
+  /**
+   * function: 카카오 로그아웃
+   * @param accessToken
+   * @param uid 회원 번호
+   * @returns 응답 코드, 로그아웃된 회원 번호
+   */
   async kakaoSignOut(accessToken: string, uid: string) {
     if (!accessToken) {
       throw new BadRequestException('No accessToken provided');
     }
 
-    const headers = {
-      'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+    const reqHeaders = {
+      Authorization: `Bearer ${accessToken}`,
     };
 
-    const body = {
+    const reqBody = {
       target_id_type: 'user_id',
       target_id: uid,
     };
@@ -50,14 +63,16 @@ export class UserService {
         method: 'POST',
         url: process.env.KAKAO_SIGNOUT_URL,
         timeout: 30000,
-        headers,
-        data: body,
+        headers: reqHeaders,
+        data: reqBody,
       });
 
+      const { id } = response.data;
+
       console.log('hello', response);
-      return response.data;
+      return id;
     } catch (error) {
-      console.log(error);
+      throw new BadRequestException('Failed to sign out');
     }
   }
 
@@ -82,10 +97,15 @@ export class UserService {
       const { sub, nickname, picture, email } = response.data;
       return { sub, nickname, picture, email };
     } catch (error) {
-      console.log(error);
+      throw new UnauthorizedException('Failed to get user information');
     }
   }
 
+  /**
+   * function: 유저 정보 입력 (회원가입)
+   * @param accessToken
+   * @param refreshToken
+   */
   async registerUser(accessToken: string, refreshToken: string) {
     const userInfo = await this.getKakaoUserInfo(accessToken);
     const { sub, nickname, picture, email } = userInfo;
@@ -104,11 +124,21 @@ export class UserService {
   }
 
   async updateUser(uid: string, nickname: string) {
-    await this.userRepository.updateUserInfoByUID(uid, nickname);
+    const { status, profile } = await this.userRepository.getUserInfoByUID(uid);
+    const id = profile.id as number;
+
+    if (status === AccountStatus.ACTIVE) {
+      await this.userRepository.updateUserInfoByUID(id, nickname);
+    }
   }
 
   async deleteUser(uid: string) {
-    await this.userRepository.deleteUserByUID(uid);
+    const user = await this.userRepository.getUserByUID(uid);
+    const existedUID = user.uid;
+
+    if (uid === existedUID) {
+      await this.userRepository.deleteUserByUID(uid);
+    }
   }
 
   // async createUser(testDto: TestDto) {
@@ -128,6 +158,6 @@ export class UserService {
   // }
 
   async getUserInfo(uid: string) {
-    return await this.userRepository.getUserByUID(uid);
+    return await this.userRepository.getUserInfoByUID(uid);
   }
 }

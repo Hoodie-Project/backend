@@ -38,6 +38,10 @@ export class UserRepository {
   }
 
   async getUserByUID(uid: string) {
+    return this.userAccountRepository.findOne({ where: { uid } });
+  }
+
+  async getUserInfoByUID(uid: string) {
     return this.userAccountRepository.findOne({
       where: { uid },
       relations: {
@@ -46,25 +50,16 @@ export class UserRepository {
     });
   }
 
-  async updateUserInfoByUID(uid: string, nickname: string) {
-    const { status, profile } = await this.getUserByUID(uid);
-    const id = profile.id as number;
-
-    if (status === AccountStatus.ACTIVE) {
-      await this.userProfileRepository.update(id, { nickname });
-    }
+  async updateUserInfoByUID(id: number, nickname: string) {
+    await this.userProfileRepository.update(id, { nickname });
   }
 
   async deleteUserByUID(uid: string) {
-    const user = await this.getUserByUID(uid);
-    const existedUID = user.uid;
-    if (uid === existedUID) {
-      await this.userAccountRepository.update(
-        { uid: uid },
-        {
-          status: AccountStatus.INACTIVE,
-        },
-      );
-    }
+    await this.userAccountRepository.update(
+      { uid: uid },
+      {
+        status: AccountStatus.INACTIVE,
+      },
+    );
   }
 }
