@@ -50,7 +50,7 @@ export class UserService {
     }
 
     const reqHeaders = {
-      'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+      Authorization: `Bearer ${accessToken}`,
     };
 
     const reqBody = {
@@ -67,8 +67,10 @@ export class UserService {
         data: reqBody,
       });
 
+      const { id } = response.data;
+
       console.log('hello', response);
-      return response.data;
+      return id;
     } catch (error) {
       throw new BadRequestException('Failed to sign out');
     }
