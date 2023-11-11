@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { GoogleTokenDto } from './dto/google-token.dto';
 import { KakaoUserRepository } from '../kakao/repository/kakao.repository';
 import { KakaoUserService } from '../kakao/kakao-user.service';
@@ -26,12 +30,41 @@ export class GoogleUserService {
 
     // 회원 가입 처리
     if (sub !== uid) {
-      await this.registerUser(email, email_verified, profile);
+      await this.registerUser(
+        sub,
+        refreshToken,
+        email,
+        email_verified,
+        profile,
+      );
     }
 
     // 로그인 처리
     return { accessToken, refreshToken, idToken };
   }
 
-  async registerUser(email: string, email_verified: boolean, profile: object) {}
+  async registerUser(
+    sub: string,
+    refreshToken: string,
+    email: string,
+    email_verified: boolean,
+    profile: any,
+  ) {
+    const { id, picture } = profile;
+
+    if (email_verified !== true) {
+      throw new UnauthorizedException('Unverified email');
+    }
+    const userProfileEntity = await this.kakaoUserRepository.insertProfileInfo(
+      id,
+      picture,
+    );
+
+    await this.kakaoUserRepository.insertAccountInfo(
+      sub,
+      refreshToken,
+      email,
+      userProfileEntity,
+    );
+  }
 }
