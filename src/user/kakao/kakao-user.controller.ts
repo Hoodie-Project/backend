@@ -9,8 +9,8 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { KakaoUserService } from '@src/user/kakao-user.service';
-import { KakaoTokenDto } from '@src/user/dto/kakao-token.dto';
+import { KakaoUserService } from '@src/user/kakao/kakao-user.service';
+import { KakaoTokenDto } from '@src/user/kakao/dto/kakao-token.dto';
 
 @Controller('user')
 export class KakaoUserController {

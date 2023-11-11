@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from '@src/auth/auth.service';
-import { AuthController } from '@src/auth/auth.controller';
+import { KakaoAuthService } from '@src/auth/kakao/kakao-auth.service';
+import { KakaoAuthController } from '@src/auth/kakao/kakao-auth.controller';
 
 @Module({
-  controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  controllers: [KakaoAuthController],
+  providers: [KakaoAuthService],
+  exports: [KakaoAuthService],
 })
 export class AuthModule {}

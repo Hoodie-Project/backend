@@ -4,12 +4,10 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserRepository } from '@src/user/repository/user.repository';
 import axios from 'axios';
 
 @Injectable()
-export class AuthService {
-  private readonly userRepository: UserRepository;
+export class KakaoAuthService {
   async validateKakaoIdToken(idToken) {
     // 토큰 헤더, 페이로드, 서명 분리
     const [header, payload]: string[] = idToken.split('.');
