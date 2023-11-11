@@ -57,14 +57,17 @@ export class AuthService {
       throw new BadRequestException('No header provided');
     }
 
-    const { kid }: any = Buffer.from(header, 'base64').toString('utf-8');
-    const publicKeyList = await this.getKakaoPublicKey();
-    const confirmedKey = publicKeyList.some((key) => key === kid);
+    const decodedHeader = Buffer.from(header, 'base64').toString('utf-8');
+    const { kid } = JSON.parse(decodedHeader);
 
-    if (confirmedKey === false) {
+    const publicKeyList = await this.getKakaoPublicKey();
+    const confirmedKey = publicKeyList.find((key) => key.kid === kid);
+
+    if (confirmedKey === undefined) {
       throw new BadRequestException('Wrong public key');
     }
-    return confirmedKey;
+
+    // 서명 검증 로직 필요
   }
 
   async getKakaoPublicKey() {
