@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserRepository } from '@src/user/repository/user.repository';
 import { KakaoTokenDto } from '@src/user/dto/kakao-token.dto';
 import { AuthService } from '@src/auth/auth.service';
@@ -9,7 +13,7 @@ import { AccountStatus } from './types/account-status';
 export class UserService {
   constructor(
     private readonly authService: AuthService,
-    private readonly userRepository: UserRepository,
+    private userRepository: UserRepository,
   ) {}
 
   /**
@@ -21,12 +25,10 @@ export class UserService {
 
     await this.authService.validateKakaoIdToken(idToken);
 
-    const userInfo = await this.getKakaoUserInfo(accessToken);
-    const { sub } = userInfo;
+    const { sub } = await this.getKakaoUserInfo(accessToken);
+    const { uid } = await this.userRepository.getUserByUID(sub);
 
-    const user = await this.userRepository.getUserByUID(sub);
-
-    if (user.uid !== sub) {
+    if (uid !== sub) {
       this.registerUser(accessToken, refreshToken);
     }
     return { accessToken, refreshToken, idToken };
@@ -83,7 +85,7 @@ export class UserService {
       const { sub, nickname, picture, email } = response.data;
       return { sub, nickname, picture, email };
     } catch (error) {
-      throw new BadRequestException('Failed to get user information');
+      throw new UnauthorizedException('Failed to get user information');
     }
   }
 
@@ -105,7 +107,7 @@ export class UserService {
   }
 
   async updateUser(uid: string, nickname: string) {
-    const { status, profile } = await this.userRepository.getUserByUID(uid);
+    const { status, profile } = await this.userRepository.getUserInfoByUID(uid);
     const id = profile.id as number;
 
     if (status === AccountStatus.ACTIVE) {
@@ -139,6 +141,6 @@ export class UserService {
   // }
 
   async getUserInfo(uid: string) {
-    return await this.userRepository.getUserByUID(uid);
+    return await this.userRepository.getUserInfoByUID(uid);
   }
 }

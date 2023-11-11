@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserRepository } from '@src/user/repository/user.repository';
@@ -11,30 +12,22 @@ export class AuthService {
   private readonly userRepository: UserRepository;
   async validateKakaoIdToken(idToken) {
     // 토큰 헤더, 페이로드, 서명 분리
-    const [header, payload, signature]: string[] = idToken.split('.');
+    const [header, payload]: string[] = idToken.split('.');
 
     // 페이로드 유효성 검증
     await this.validateKakaoPayload(payload);
 
     // 서명 유효성 검증
-    await this.validateKakaoSignature(signature);
+    await this.validateKakaoSignature(header);
   }
 
-  async validateKakaoPayload(payload) {
+  async validateKakaoPayload(payload: string) {
     if (!payload) {
       throw new BadRequestException('No payload provided');
     }
 
-    // 페이로드 디코딩
     const decodedPayload = Buffer.from(payload, 'base64').toString('utf-8');
-    const parsedPayload = JSON.parse(decodedPayload) as {
-      iss: string;
-      aud: string;
-      exp: number;
-      nonce: string;
-    };
-
-    const { iss, aud, exp, nonce } = parsedPayload;
+    const { iss, aud, exp, nonce } = JSON.parse(decodedPayload);
 
     if (iss !== process.env.KAKAO_ISSUER) {
       throw new UnauthorizedException('Wrong issuer');
@@ -44,17 +37,48 @@ export class AuthService {
       throw new UnauthorizedException('Wrong client key');
     }
 
-    if (exp) {
+    const currentTimestamp = Math.floor(new Date().getTime() / 1000);
+    if (exp < currentTimestamp) {
+      throw new UnauthorizedException('Expired IdToken');
     }
 
     if (!nonce) {
       throw new UnauthorizedException('Nonce required');
     }
-    // 토큰 정보 요청
-    const tokenInfo = await this.getIdTokenInfo(payload);
   }
 
-  async getIdTokenInfo(payload: string) {
+  /**
+   * function: 카카오 서명 유효성 검증
+   * @param {string} header idToken의 헤더
+   * @returns true를 반환
+   */
+  async validateKakaoSignature(header: string) {
+    if (!header) {
+      throw new BadRequestException('No header provided');
+    }
+
+    const { kid }: any = Buffer.from(header, 'base64').toString('utf-8');
+    const publicKeyList = await this.getKakaoPublicKey();
+    const confirmedKey = publicKeyList.some((key) => key === kid);
+
+    if (confirmedKey === false) {
+      throw new BadRequestException('Wrong public key');
+    }
+    return confirmedKey;
+  }
+
+  async getKakaoPublicKey() {
+    try {
+      const response = await axios.get(process.env.KAKAO_PUBLICKEY_URL);
+      const keyArr = response.data;
+      const publicKeyList = keyArr.map((list) => list.kid);
+      return publicKeyList;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to get public key');
+    }
+  }
+
+  async getKakaoIdTokenInfo(payload: string) {
     if (!payload) {
       throw new BadRequestException('No payload provided');
     }
@@ -78,22 +102,4 @@ export class AuthService {
       console.log(error);
     }
   }
-
-  async validateKakaoSignature(signature) {}
-
-  /**
-   * id token으로 사용자 정보 요청 및 로그인 처리
-   * 1. 토큰 객체를 받아서 id token을 가져오기
-   *  1-1. id token 유효성 검증하기
-   *    ㄱ) 헤더, 페이로드, 서명 분리
-   *    ㄴ) 페이로드 디코딩 (base64)
-   *    ㄷ) iss, aud, exp, nonc 값 일치 확인 <=> id 토큰 정보로 확인
-   *    ㄹ) 서명 검증
-   *  1-1. refreshToken 저장하기
-   * 2. id_token 안의 사용자 정보 받아오기
-   *  2-1. 사용자 정보 저장하기
-   * 3. 로그인 처리
-   * 4. 로그아웃 처리
-   *
-   */
 }
