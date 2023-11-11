@@ -1,12 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { GoogleTokenDto } from './dto/google-token.dto';
 import { KakaoUserRepository } from '../kakao/repository/kakao.repository';
 import { KakaoUserService } from '../kakao/kakao-user.service';
-import { GoogleUserAccountInfo } from './types/google-token';
 
 @Injectable()
 export class GoogleUserService {
