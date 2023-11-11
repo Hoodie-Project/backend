@@ -17,8 +17,9 @@ export class UserService {
   ) {}
 
   /**
-   * function: 카카오톡 OAUTH 로그인 로직
-   * @param kakaoTokenDto: 카카오 토큰 객체
+   * function: 카카오톡 OAUTH 메인 로그인
+   * @param kakaoTokenDto 카카오 요청 토큰 객체
+   * @returns accessToken, refreshToken, idToken
    */
   async kakaoSignIn(kakaoTokenDto: KakaoTokenDto) {
     const { accessToken, refreshToken, idToken } = kakaoTokenDto;
@@ -28,12 +29,21 @@ export class UserService {
     const { sub } = await this.getKakaoUserInfo(accessToken);
     const { uid } = await this.userRepository.getUserByUID(sub);
 
+    // 회원 가입 처리
     if (uid !== sub) {
       this.registerUser(accessToken, refreshToken);
     }
+
+    // 로그인 처리
     return { accessToken, refreshToken, idToken };
   }
 
+  /**
+   * function: 카카오 로그아웃
+   * @param accessToken
+   * @param uid 회원 번호
+   * @returns 응답 코드, 로그아웃된 회원 번호
+   */
   async kakaoSignOut(accessToken: string, uid: string) {
     if (!accessToken) {
       throw new BadRequestException('No accessToken provided');
@@ -89,6 +99,11 @@ export class UserService {
     }
   }
 
+  /**
+   * function: 유저 정보 입력 (회원가입)
+   * @param accessToken
+   * @param refreshToken
+   */
   async registerUser(accessToken: string, refreshToken: string) {
     const userInfo = await this.getKakaoUserInfo(accessToken);
     const { sub, nickname, picture, email } = userInfo;

@@ -48,9 +48,9 @@ export class AuthService {
   }
 
   /**
-   * function: 카카오 서명 유효성 검증
+   * function: 카카오 서명 유효성 검증 로직
    * @param {string} header idToken의 헤더
-   * @returns true를 반환
+   * @returns
    */
   async validateKakaoSignature(header: string) {
     if (!header) {
