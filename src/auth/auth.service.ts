@@ -60,6 +60,8 @@ export class AuthService {
     const decodedHeader = Buffer.from(header, 'base64').toString('utf-8');
     const { kid } = JSON.parse(decodedHeader);
 
+    // 공개키 캐싱 로직 필요
+
     const publicKeyList = await this.getKakaoPublicKey();
     const confirmedKey = publicKeyList.find((key) => key.kid === kid);
 

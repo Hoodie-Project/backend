@@ -10,7 +10,7 @@ import axios from 'axios';
 import { AccountStatus } from './types/account-status';
 
 @Injectable()
-export class UserService {
+export class KakaoUserService {
   constructor(
     private readonly authService: AuthService,
     private userRepository: UserRepository,
@@ -127,9 +127,10 @@ export class UserService {
     const { status, profile } = await this.userRepository.getUserInfoByUID(uid);
     const id = profile.id as number;
 
-    if (status === AccountStatus.ACTIVE) {
-      await this.userRepository.updateUserInfoByUID(id, nickname);
+    if (status !== AccountStatus.ACTIVE) {
+      throw new UnauthorizedException(`This user is ${status}`);
     }
+    await this.userRepository.updateUserInfoByUID(id, nickname);
   }
 
   async deleteUser(uid: string) {

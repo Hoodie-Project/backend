@@ -38,11 +38,11 @@ export class UserRepository {
   }
 
   async getUserByUID(uid: string) {
-    return this.userAccountRepository.findOne({ where: { uid } });
+    return await this.userAccountRepository.findOne({ where: { uid } });
   }
 
   async getUserInfoByUID(uid: string) {
-    return this.userAccountRepository.findOne({
+    return await this.userAccountRepository.findOne({
       where: { uid },
       relations: {
         profile: true,

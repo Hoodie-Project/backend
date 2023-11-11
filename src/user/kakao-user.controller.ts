@@ -9,12 +9,12 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { UserService } from '@src/user/user.service';
+import { KakaoUserService } from '@src/user/kakao-user.service';
 import { KakaoTokenDto } from '@src/user/dto/kakao-token.dto';
 
 @Controller('user')
-export class UserController {
-  constructor(private readonly userService: UserService) {}
+export class KakaoUserController {
+  constructor(private readonly kakaoUserService: KakaoUserService) {}
 
   @Get('/hello')
   sayHello() {
@@ -26,18 +26,18 @@ export class UserController {
   @Post('/signin/kakao')
   @UsePipes(ValidationPipe)
   kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenDto) {
-    return this.userService.kakaoSignIn(kakaoTokenDto);
+    return this.kakaoUserService.kakaoSignIn(kakaoTokenDto);
   }
 
   @Post('/signout/kakao')
   kakaoSignOut(@Body('accessToken, uid') accessToken: string, uid: string) {
-    return this.userService.kakaoSignOut(accessToken, uid);
+    return this.kakaoUserService.kakaoSignOut(accessToken, uid);
   }
 
   @Patch('/:uid')
   @UsePipes(ValidationPipe)
   updateUser(@Param('uid') uid: string, @Body('nickname') nickname: string) {
-    return this.userService.updateUser(uid, nickname);
+    return this.kakaoUserService.updateUser(uid, nickname);
   }
 
   @Patch('/profile_image/:uid')
@@ -46,17 +46,17 @@ export class UserController {
 
   @Delete('/:uid')
   deleteUser(@Param('uid') uid: string) {
-    return this.userService.deleteUser(uid);
+    return this.kakaoUserService.deleteUser(uid);
   }
 
   // @Post()
   // @UsePipes(ValidationPipe)
   // createUser(@Body() testDto: TestDto) {
-  //   this.userService.createUser(testDto);
+  //   this.kakaoUserService.createUser(testDto);
   // }
 
   @Get('/info')
   getUserInfo(@Param('uid') uid: string) {
-    return this.userService.getUserInfo(uid);
+    return this.kakaoUserService.getUserInfo(uid);
   }
 }

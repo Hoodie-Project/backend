@@ -7,8 +7,4 @@ import { UserRepository } from '@src/user/repository/user.repository';
 export class AuthRepository {
   private authRepository: AuthRepository;
   constructor(private readonly userRepository: UserRepository) {}
-
-  async getExpFrom() {
-    this.userRepository
-  }
 }
