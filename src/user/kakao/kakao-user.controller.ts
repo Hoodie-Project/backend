@@ -12,7 +12,7 @@ import {
 import { KakaoUserService } from '@src/user/kakao/kakao-user.service';
 import { KakaoTokenDto } from '@src/user/kakao/dto/kakao-token.dto';
 
-@Controller('user')
+@Controller('kakao')
 export class KakaoUserController {
   constructor(private readonly kakaoUserService: KakaoUserService) {}
 
@@ -23,13 +23,13 @@ export class KakaoUserController {
     };
   }
 
-  @Post('/signin/kakao')
+  @Post('/signin')
   @UsePipes(ValidationPipe)
   kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenDto) {
     return this.kakaoUserService.kakaoSignIn(kakaoTokenDto);
   }
 
-  @Post('/signout/kakao')
+  @Post('/signout')
   kakaoSignOut(@Body('accessToken, uid') accessToken: string, uid: string) {
     return this.kakaoUserService.kakaoSignOut(accessToken, uid);
   }
