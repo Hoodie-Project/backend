@@ -3,12 +3,12 @@ import { KakaoUserService } from '@src/user/kakao/kakao-user.service';
 import { KakaoUserController } from '@src/user/kakao/kakao-user.controller';
 import { KakaoUserRepository } from '@src/user/kakao/repository/kakao.repository';
 import { AuthModule } from '@src/auth/auth.module';
-import { GoogleController } from './google/test/google.controller';
-import { GoogleService } from './google/google.service';
+import { GoogleUserController } from './google/google-user.controller';
+import { GoogleUserService } from './google/google-user.service';
 
 @Module({
   imports: [AuthModule],
-  controllers: [KakaoUserController, GoogleController],
-  providers: [KakaoUserService, KakaoUserRepository, GoogleService],
+  controllers: [KakaoUserController, GoogleUserController],
+  providers: [KakaoUserService, KakaoUserRepository, GoogleUserService],
 })
 export class UserModule {}

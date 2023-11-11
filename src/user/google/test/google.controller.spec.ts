@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GoogleController } from './google.controller';
+import { GoogleController } from '../google-user.controller';
 
 describe('GoogleController', () => {
   let controller: GoogleController;
