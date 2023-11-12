@@ -4,7 +4,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 export class CommonAuthService {
   async validatePayload(payload: string) {}
 
-  async validateIssuer(iss: string) {
+  async validateIss(iss: string) {
     if (!iss) {
       throw new UnauthorizedException('No Issuer provided');
     }
@@ -23,7 +23,7 @@ export class CommonAuthService {
     }
   }
 
-  async validateAudience(aud: string) {
+  async validateAud(aud: string) {
     if (!aud) {
       throw new UnauthorizedException('No Issuer provided');
     }
@@ -37,6 +37,17 @@ export class CommonAuthService {
 
     if (aud === process.env.KAKAO_CLIENT_ID) {
       throw new UnauthorizedException('Wrong kakao client key');
+    }
+  }
+
+  async validateExp(exp: number) {
+    if (!aud) {
+      throw new UnauthorizedException('No Issuer provided');
+    }
+
+    const currentTimestamp = Math.floor(new Date().getTime() / 1000);
+    if (exp < currentTimestamp) {
+      throw new UnauthorizedException('Expired IdToken');
     }
   }
 }

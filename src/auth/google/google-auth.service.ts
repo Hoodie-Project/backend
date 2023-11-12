@@ -17,7 +17,8 @@ export class GoogleAuthService {
     const decodedPayload = Buffer.from(payload, 'base64').toString('utf-8');
     const { iss, aud, exp, nonce } = JSON.parse(decodedPayload);
 
-    await this.commonAuthService.validateIssuer(iss);
-    await this.commonAuthService.validateAudience(aud);
+    await this.commonAuthService.validateIss(iss);
+    await this.commonAuthService.validateAud(aud);
+    await this.commonAuthService.validateExp(exp);
   }
 }
