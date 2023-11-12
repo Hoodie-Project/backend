@@ -2,8 +2,6 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class CommonAuthService {
-  async validatePayload(payload: string) {}
-
   async validateIss(iss: string) {
     const issuer = iss.split('.')[1];
 
