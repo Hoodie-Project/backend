@@ -5,9 +5,6 @@ export class CommonAuthService {
   async validatePayload(payload: string) {}
 
   async validateIss(iss: string) {
-    if (!iss) {
-      throw new UnauthorizedException('No Issuer provided');
-    }
     const issuer = iss.split('.')[1];
 
     if (issuer === 'kakao') {
@@ -24,9 +21,6 @@ export class CommonAuthService {
   }
 
   async validateAud(aud: string) {
-    if (!aud) {
-      throw new UnauthorizedException('No Issuer provided');
-    }
     const googleAud = aud.split('.').reverse[1];
 
     if (googleAud === 'googleusercontent') {
@@ -41,13 +35,15 @@ export class CommonAuthService {
   }
 
   async validateExp(exp: number) {
-    if (!aud) {
-      throw new UnauthorizedException('No Issuer provided');
-    }
-
     const currentTimestamp = Math.floor(new Date().getTime() / 1000);
     if (exp < currentTimestamp) {
       throw new UnauthorizedException('Expired IdToken');
+    }
+  }
+
+  async validateNonce(nonce: string) {
+    if (!nonce) {
+      throw new UnauthorizedException('Nonce required');
     }
   }
 }
