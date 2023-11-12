@@ -18,6 +18,6 @@ export class GoogleAuthService {
     const { iss, aud, exp, nonce } = JSON.parse(decodedPayload);
 
     await this.commonAuthService.validateIssuer(iss);
-    // await this.commonAuthService.validateAudience(aud);
+    await this.commonAuthService.validateAudience(aud);
   }
 }

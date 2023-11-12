@@ -23,5 +23,20 @@ export class CommonAuthService {
     }
   }
 
-  async validateAudience(aud: string) {}
+  async validateAudience(aud: string) {
+    if (!aud) {
+      throw new UnauthorizedException('No Issuer provided');
+    }
+    const googleAud = aud.split('.').reverse[1];
+
+    if (googleAud === 'googleusercontent') {
+      if (googleAud !== process.env.GOOGLE_CLIENT_ID) {
+        throw new UnauthorizedException('Wrong google client key');
+      }
+    }
+
+    if (aud === process.env.KAKAO_CLIENT_ID) {
+      throw new UnauthorizedException('Wrong kakao client key');
+    }
+  }
 }
