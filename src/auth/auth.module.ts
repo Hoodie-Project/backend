@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from '@src/auth/auth.service';
-import { AuthController } from '@src/auth/auth.controller';
+import { KakaoAuthService } from '@src/auth/kakao/kakao-auth.service';
+import { KakaoAuthController } from '@src/auth/kakao/kakao-auth.controller';
+import { GoogleAuthService } from './google/google-auth.service';
+import { GoogleAuthController } from './google/google.controller';
+import { CommonAuthService } from './common/idtoken-validation.provider';
 
 @Module({
-  controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  controllers: [KakaoAuthController, GoogleAuthController],
+  providers: [KakaoAuthService, GoogleAuthService, CommonAuthService],
+  exports: [KakaoAuthService, GoogleAuthService],
 })
 export class AuthModule {}

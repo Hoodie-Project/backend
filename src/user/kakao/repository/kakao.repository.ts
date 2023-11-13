@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { UserProfileEntity } from '@src/user/entity/user-profile.entity';
-import { UserAccountEntity } from '@src/user/entity/user-account.entity';
-import { AccountStatus } from '@src/user/types/account-status';
+import { UserProfileEntity } from '@src/user/kakao/entity/user-profile.entity';
+import { UserAccountEntity } from '@src/user/kakao/entity/user-account.entity';
+import { AccountStatus } from '@src/user/kakao/types/account-status';
 
 @Injectable()
-export class UserRepository {
+export class KakaoUserRepository {
   private userProfileRepository: Repository<UserProfileEntity>;
   private userAccountRepository: Repository<UserAccountEntity>;
 
@@ -38,11 +38,11 @@ export class UserRepository {
   }
 
   async getUserByUID(uid: string) {
-    return this.userAccountRepository.findOne({ where: { uid } });
+    return await this.userAccountRepository.findOne({ where: { uid } });
   }
 
   async getUserInfoByUID(uid: string) {
-    return this.userAccountRepository.findOne({
+    return await this.userAccountRepository.findOne({
       where: { uid },
       relations: {
         profile: true,

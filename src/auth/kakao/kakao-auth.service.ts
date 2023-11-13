@@ -4,13 +4,13 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserRepository } from '@src/user/repository/user.repository';
 import axios from 'axios';
+import { CommonAuthService } from '../common/idtoken-validation.provider';
 
 @Injectable()
-export class AuthService {
-  private readonly userRepository: UserRepository;
-  async validateKakaoIdToken(idToken) {
+export class KakaoAuthService {
+  constructor(private readonly commonAuthService: CommonAuthService) {}
+  async validateKakaoIdToken(idToken: string) {
     // 토큰 헤더, 페이로드, 서명 분리
     const [header, payload]: string[] = idToken.split('.');
 
@@ -29,22 +29,10 @@ export class AuthService {
     const decodedPayload = Buffer.from(payload, 'base64').toString('utf-8');
     const { iss, aud, exp, nonce } = JSON.parse(decodedPayload);
 
-    if (iss !== process.env.KAKAO_ISSUER) {
-      throw new UnauthorizedException('Wrong issuer');
-    }
-
-    if (aud !== process.env.KAKAO_CLIENT_ID) {
-      throw new UnauthorizedException('Wrong client key');
-    }
-
-    const currentTimestamp = Math.floor(new Date().getTime() / 1000);
-    if (exp < currentTimestamp) {
-      throw new UnauthorizedException('Expired IdToken');
-    }
-
-    if (!nonce) {
-      throw new UnauthorizedException('Nonce required');
-    }
+    await this.commonAuthService.validateIss(iss);
+    await this.commonAuthService.validateAud(aud);
+    await this.commonAuthService.validateExp(exp);
+    await this.commonAuthService.validateNonce(nonce);
   }
 
   /**
@@ -59,6 +47,8 @@ export class AuthService {
 
     const decodedHeader = Buffer.from(header, 'base64').toString('utf-8');
     const { kid } = JSON.parse(decodedHeader);
+
+    // 공개키 캐싱 로직 필요
 
     const publicKeyList = await this.getKakaoPublicKey();
     const confirmedKey = publicKeyList.find((key) => key.kid === kid);
