@@ -3,7 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { KakaoUserRepository } from '@src/user/common/repository/kakao.repository';
+import { UserRepository } from '@src/user/common/repository/user.repository';
 import { KakaoTokenDto } from '@src/user/kakao/dto/kakao-token.dto';
 import { KakaoAuthService } from '@src/auth/kakao/kakao-auth.service';
 import axios from 'axios';
@@ -13,7 +13,7 @@ import { AccountStatus } from './types/account-status';
 export class KakaoUserService {
   constructor(
     private readonly kakaoAuthService: KakaoAuthService,
-    private kakaoUserRepository: KakaoUserRepository,
+    private userRepository: UserRepository,
   ) {}
 
   /**
@@ -27,7 +27,7 @@ export class KakaoUserService {
     await this.kakaoAuthService.validateKakaoIdToken(idToken);
 
     const { sub } = await this.getKakaoUserInfo(accessToken);
-    const { uid } = await this.kakaoUserRepository.getUserByUID(sub);
+    const { uid } = await this.userRepository.getUserByUID(sub);
 
     // 회원 가입 처리
     if (uid !== sub) {
@@ -110,12 +110,12 @@ export class KakaoUserService {
     const userInfo = await this.getKakaoUserInfo(accessToken);
     const { sub, nickname, picture, email } = userInfo;
 
-    const userProfileEntity = await this.kakaoUserRepository.insertProfileInfo(
+    const userProfileEntity = await this.userRepository.insertProfileInfo(
       nickname,
       picture,
     );
 
-    await this.kakaoUserRepository.insertAccountInfo(
+    await this.userRepository.insertAccountInfo(
       sub,
       refreshToken,
       email,
@@ -124,34 +124,33 @@ export class KakaoUserService {
   }
 
   async updateUser(uid: string, nickname: string) {
-    const { status, profile } =
-      await this.kakaoUserRepository.getUserInfoByUID(uid);
+    const { status, profile } = await this.userRepository.getUserInfoByUID(uid);
     const id = profile.id as number;
 
     if (status !== AccountStatus.ACTIVE) {
       throw new UnauthorizedException(`This user is ${status}`);
     }
-    await this.kakaoUserRepository.updateUserInfoByUID(id, nickname);
+    await this.userRepository.updateUserInfoByUID(id, nickname);
   }
 
   async deleteUser(uid: string) {
-    const user = await this.kakaoUserRepository.getUserByUID(uid);
+    const user = await this.userRepository.getUserByUID(uid);
     const existedUID = user.uid;
 
     if (uid === existedUID) {
-      await this.kakaoUserRepository.deleteUserByUID(uid);
+      await this.userRepository.deleteUserByUID(uid);
     }
   }
 
   // async createUser(testDto: TestDto) {
   //   const { uid, refreshToken, email, nickname, image } = testDto;
 
-  //   const userProfileEntity = await this.kakaoUserRepository.insertProfileInfo(
+  //   const userProfileEntity = await this.userRepository.insertProfileInfo(
   //     nickname,
   //     image,
   //   );
 
-  //   await this.kakaoUserRepository.insertAccountInfo(
+  //   await this.userRepository.insertAccountInfo(
   //     uid,
   //     refreshToken,
   //     email,
@@ -160,6 +159,6 @@ export class KakaoUserService {
   // }
 
   async getUserInfo(uid: string) {
-    return await this.kakaoUserRepository.getUserInfoByUID(uid);
+    return await this.userRepository.getUserInfoByUID(uid);
   }
 }

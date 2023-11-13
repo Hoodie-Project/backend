@@ -7,7 +7,6 @@ export class GoogleAuthService {
 
   async validateGoogleIdToken(payload: string) {
     // Verify that the ID token is properly signed by the issuer
-    // const [payload]: string[] = idToken.split('.');
 
     // 페이로드 유효성 검증
     await this.validateGooglePayload(payload);
@@ -21,5 +20,7 @@ export class GoogleAuthService {
     await this.commonAuthService.validateAud(aud);
     await this.commonAuthService.validateExp(exp);
     await this.commonAuthService.validateNonce(nonce);
+
+    return;
   }
 }

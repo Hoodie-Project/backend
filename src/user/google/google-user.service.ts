@@ -1,13 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { GoogleTokenDto } from './dto/google-token.dto';
-import { KakaoUserRepository } from '../common/repository/kakao.repository';
+import { UserRepository } from '../common/repository/user.repository';
 import { KakaoUserService } from '../kakao/kakao-user.service';
 import { GoogleAuthService } from '@src/auth/google/google-auth.service';
 
 @Injectable()
 export class GoogleUserService {
   constructor(
-    private readonly kakaoUserRepository: KakaoUserRepository,
+    private readonly userRepository: UserRepository,
     private readonly kakaoUserService: KakaoUserService,
     private readonly googleAuthService: GoogleAuthService,
   ) {}
@@ -23,7 +23,7 @@ export class GoogleUserService {
     const decodedPayload = Buffer.from(payload, 'base64').toString('utf-8');
     const { sub, email, email_verified, profile } = JSON.parse(decodedPayload);
 
-    const { uid } = await this.kakaoUserRepository.getUserByUID(sub);
+    const { uid } = await this.userRepository.getUserByUID(sub);
 
     // 회원 가입 처리
     if (sub !== uid) {
@@ -53,12 +53,12 @@ export class GoogleUserService {
       throw new UnauthorizedException('Unverified email');
     }
 
-    const userProfileEntity = await this.kakaoUserRepository.insertProfileInfo(
+    const userProfileEntity = await this.userRepository.insertProfileInfo(
       id,
       picture,
     );
 
-    await this.kakaoUserRepository.insertAccountInfo(
+    await this.userRepository.insertAccountInfo(
       sub,
       refreshToken,
       email,

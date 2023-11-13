@@ -5,7 +5,7 @@ import { UserAccountEntity } from '@src/user/common/entity/user-account.entity';
 import { AccountStatus } from '@src/user/kakao/types/account-status';
 
 @Injectable()
-export class KakaoUserRepository {
+export class UserRepository {
   private userProfileRepository: Repository<UserProfileEntity>;
   private userAccountRepository: Repository<UserAccountEntity>;
 
