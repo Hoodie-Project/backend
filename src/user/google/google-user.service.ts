@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { GoogleTokenDto } from './dto/google-token.dto';
-import { KakaoUserRepository } from '../kakao/repository/kakao.repository';
+import { KakaoUserRepository } from '../common/repository/kakao.repository';
 import { KakaoUserService } from '../kakao/kakao-user.service';
 import { GoogleAuthService } from '@src/auth/google/google-auth.service';
 
@@ -52,6 +52,7 @@ export class GoogleUserService {
     if (email_verified !== true) {
       throw new UnauthorizedException('Unverified email');
     }
+
     const userProfileEntity = await this.kakaoUserRepository.insertProfileInfo(
       id,
       picture,

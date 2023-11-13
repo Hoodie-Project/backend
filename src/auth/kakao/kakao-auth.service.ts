@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import axios from 'axios';
 import { CommonAuthService } from '../common/idtoken-validation.provider';

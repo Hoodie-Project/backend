@@ -3,7 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { KakaoUserRepository } from '@src/user/kakao/repository/kakao.repository';
+import { KakaoUserRepository } from '@src/user/common/repository/kakao.repository';
 import { KakaoTokenDto } from '@src/user/kakao/dto/kakao-token.dto';
 import { KakaoAuthService } from '@src/auth/kakao/kakao-auth.service';
 import axios from 'axios';

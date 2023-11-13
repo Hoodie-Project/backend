@@ -7,7 +7,7 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { UserProfileEntity } from '@src/user/kakao/entity/user-profile.entity';
+import { UserProfileEntity } from '@src/user/common/entity/user-profile.entity';
 import { AccountStatus } from '@src/user/kakao/types/account-status';
 
 @Entity('account')
