@@ -3,7 +3,6 @@ import { GoogleTokenDto } from './dto/google-token.dto';
 import { UserRepository } from '../common/repository/user.repository';
 import { GoogleAuthService } from '@src/auth/google/google-auth.service';
 import { CommonAuthService } from '@src/auth/common/common-auth.provider';
-import path from 'path';
 
 @Injectable()
 export class GoogleUserService {
