@@ -1,15 +1,16 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { GoogleTokenDto } from './dto/google-token.dto';
 import { UserRepository } from '../common/repository/user.repository';
-import { KakaoUserService } from '../kakao/kakao-user.service';
 import { GoogleAuthService } from '@src/auth/google/google-auth.service';
+import { CommonAuthService } from '@src/auth/common/common-auth.provider';
+import path from 'path';
 
 @Injectable()
 export class GoogleUserService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly kakaoUserService: KakaoUserService,
     private readonly googleAuthService: GoogleAuthService,
+    private readonly commonAuthService: CommonAuthService,
   ) {}
 
   async googleSignIn(googleTokenDto: GoogleTokenDto) {
@@ -17,11 +18,11 @@ export class GoogleUserService {
     const [payload]: string[] = idToken.split('.');
 
     // idToken 유효성 검증
-    await this.googleAuthService.validateGoogleIdToken(payload);
+    await this.googleAuthService.validateGoogleIdToken(idToken);
 
     // sub 비교
-    const decodedPayload = Buffer.from(payload, 'base64').toString('utf-8');
-    const { sub, email, email_verified, profile } = JSON.parse(decodedPayload);
+    const { sub, email, email_verified, profile } =
+      await this.commonAuthService.decodePayload(payload);
 
     const { uid } = await this.userRepository.getUserByUID(sub);
 
