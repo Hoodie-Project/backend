@@ -1,15 +1,16 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { GoogleTokenDto } from './dto/google-token.dto';
-import { KakaoUserRepository } from '../kakao/repository/kakao.repository';
-import { KakaoUserService } from '../kakao/kakao-user.service';
+import { UserRepository } from '../common/repository/user.repository';
 import { GoogleAuthService } from '@src/auth/google/google-auth.service';
+import { CommonAuthService } from '@src/auth/common/common-auth.provider';
+import path from 'path';
 
 @Injectable()
 export class GoogleUserService {
   constructor(
-    private readonly kakaoUserRepository: KakaoUserRepository,
-    private readonly kakaoUserService: KakaoUserService,
+    private readonly userRepository: UserRepository,
     private readonly googleAuthService: GoogleAuthService,
+    private readonly commonAuthService: CommonAuthService,
   ) {}
 
   async googleSignIn(googleTokenDto: GoogleTokenDto) {
@@ -17,13 +18,13 @@ export class GoogleUserService {
     const [payload]: string[] = idToken.split('.');
 
     // idToken 유효성 검증
-    await this.googleAuthService.validateGoogleIdToken(payload);
+    await this.googleAuthService.validateGoogleIdToken(idToken);
 
     // sub 비교
-    const decodedPayload = Buffer.from(payload, 'base64').toString('utf-8');
-    const { sub, email, email_verified, profile } = JSON.parse(decodedPayload);
+    const { sub, email, email_verified, profile } =
+      await this.commonAuthService.decodePayload(payload);
 
-    const { uid } = await this.kakaoUserRepository.getUserByUID(sub);
+    const { uid } = await this.userRepository.getUserByUID(sub);
 
     // 회원 가입 처리
     if (sub !== uid) {
@@ -52,12 +53,13 @@ export class GoogleUserService {
     if (email_verified !== true) {
       throw new UnauthorizedException('Unverified email');
     }
-    const userProfileEntity = await this.kakaoUserRepository.insertProfileInfo(
+
+    const userProfileEntity = await this.userRepository.insertProfileInfo(
       id,
       picture,
     );
 
-    await this.kakaoUserRepository.insertAccountInfo(
+    await this.userRepository.insertAccountInfo(
       sub,
       refreshToken,
       email,

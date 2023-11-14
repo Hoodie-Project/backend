@@ -7,4 +7,3 @@ export class UserProfileDto {
   @ApiProperty()
   image: string;
 }
-

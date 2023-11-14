@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { UserProfileEntity } from '@src/user/kakao/entity/user-profile.entity';
-import { UserAccountEntity } from '@src/user/kakao/entity/user-account.entity';
+import { UserProfileEntity } from '@src/user/common/entity/user-profile.entity';
+import { UserAccountEntity } from '@src/user/common/entity/user-account.entity';
 import { AccountStatus } from '@src/user/kakao/types/account-status';
 
 @Injectable()
-export class KakaoUserRepository {
+export class UserRepository {
   private userProfileRepository: Repository<UserProfileEntity>;
   private userAccountRepository: Repository<UserAccountEntity>;
 

@@ -2,10 +2,9 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import axios from 'axios';
-import { CommonAuthService } from '../common/idtoken-validation.provider';
+import { CommonAuthService } from '../common/common-auth.provider';
 
 @Injectable()
 export class KakaoAuthService {
@@ -45,27 +44,24 @@ export class KakaoAuthService {
       throw new BadRequestException('No header provided');
     }
 
-    const decodedHeader = Buffer.from(header, 'base64').toString('utf-8');
-    const { kid } = JSON.parse(decodedHeader);
+    const kid = await this.commonAuthService.decodeHeader(header);
 
     // 공개키 캐싱 로직 필요
 
-    const publicKeyList = await this.getKakaoPublicKey();
-    const confirmedKey = publicKeyList.find((key) => key.kid === kid);
+    const publickeyArr = await this.getKakaoPublicKey();
+    const confirmedKey = await this.commonAuthService.validateKid(
+      publickeyArr,
+      kid,
+    );
 
-    if (confirmedKey === undefined) {
-      throw new BadRequestException('Wrong public key');
-    }
-
-    // 서명 검증 로직 필요
+    return confirmedKey;
   }
 
   async getKakaoPublicKey() {
     try {
       const response = await axios.get(process.env.KAKAO_PUBLICKEY_URL);
-      const keyArr = response.data;
-      const publicKeyList = keyArr.map((list) => list.kid);
-      return publicKeyList;
+      const publickeyArr = response.data.keys;
+      return publickeyArr;
     } catch (error) {
       throw new InternalServerErrorException('Failed to get public key');
     }
