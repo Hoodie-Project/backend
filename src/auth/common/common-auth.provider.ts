@@ -13,6 +13,7 @@ export class CommonAuthService {
       if (iss !== process.env.KAKAO_ISSUER) {
         throw new UnauthorizedException('Wrong kakao issuer');
       }
+      return;
     }
 
     if (issuer === 'google') {
@@ -22,6 +23,7 @@ export class CommonAuthService {
       ) {
         throw new UnauthorizedException('Wrong google issuer');
       }
+      return;
     }
   }
 
@@ -32,10 +34,14 @@ export class CommonAuthService {
       if (googleAud !== process.env.GOOGLE_CLIENT_ID) {
         throw new UnauthorizedException('Wrong google client key');
       }
+      return;
     }
 
     if (aud === process.env.KAKAO_CLIENT_ID) {
-      throw new UnauthorizedException('Wrong kakao client key');
+      if (aud !== process.env.KAKAO_CLIENT_ID) {
+        throw new UnauthorizedException('Wrong kakao client key');
+      }
+      return;
     }
   }
 
@@ -44,13 +50,15 @@ export class CommonAuthService {
     if (exp < currentTimestamp) {
       throw new UnauthorizedException('Expired IdToken');
     }
+    return;
   }
 
-  async validateNonce(nonce: string) {
-    if (!nonce) {
-      throw new UnauthorizedException('Nonce required');
-    }
-  }
+  // async validateNonce(nonce: string) {
+  //   if (!nonce) {
+  //     throw new UnauthorizedException('Nonce required');
+  //   }
+  //   return;
+  // }
 
   async validateKid(jwtKeyArr, kid: string) {
     const publicKey = jwtKeyArr.find((key) => key.kid === kid);

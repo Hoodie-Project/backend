@@ -27,7 +27,6 @@ let GoogleAuthService = class GoogleAuthService {
         await this.commonAuthService.validateIss(iss);
         await this.commonAuthService.validateAud(aud);
         await this.commonAuthService.validateExp(exp);
-        await this.commonAuthService.validateNonce(nonce);
         return;
     }
     async validateGoogleSignature(header) {
