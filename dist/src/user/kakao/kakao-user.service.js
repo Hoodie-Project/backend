@@ -21,21 +21,21 @@ let KakaoUserService = class KakaoUserService {
         this.userRepository = userRepository;
     }
     async kakaoSignIn(kakaoTokenDto) {
-        const { accessToken, refreshToken, idToken } = kakaoTokenDto;
-        await this.kakaoAuthService.validateKakaoIdToken(idToken);
-        const { sub } = await this.getKakaoUserInfo(accessToken);
+        const { access_token, refresh_token, id_token } = kakaoTokenDto;
+        await this.kakaoAuthService.validateKakaoIdToken(id_token);
+        const { sub } = await this.getKakaoUserInfo(access_token);
         const { uid } = await this.userRepository.getUserByUID(sub);
         if (uid !== sub) {
-            this.registerUser(accessToken, refreshToken);
+            this.registerUser(access_token, refresh_token);
         }
-        return { accessToken, refreshToken, idToken };
+        return { access_token, refresh_token, id_token };
     }
-    async kakaoSignOut(accessToken, uid) {
-        if (!accessToken) {
+    async kakaoSignOut(access_token, uid) {
+        if (!access_token) {
             throw new common_1.BadRequestException('No accessToken provided');
         }
         const reqHeaders = {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${access_token}`,
         };
         const reqBody = {
             target_id_type: 'user_id',
@@ -75,11 +75,11 @@ let KakaoUserService = class KakaoUserService {
             throw new common_1.UnauthorizedException('Failed to get user information');
         }
     }
-    async registerUser(accessToken, refreshToken) {
-        const userInfo = await this.getKakaoUserInfo(accessToken);
+    async registerUser(access_token, refresh_token) {
+        const userInfo = await this.getKakaoUserInfo(access_token);
         const { sub, nickname, picture, email } = userInfo;
         const userProfileEntity = await this.userRepository.insertProfileInfo(nickname, picture);
-        await this.userRepository.insertAccountInfo(sub, refreshToken, email, userProfileEntity);
+        await this.userRepository.insertAccountInfo(sub, refresh_token, email, userProfileEntity);
     }
     async updateUser(uid, nickname) {
         const { status, profile } = await this.userRepository.getUserInfoByUID(uid);

@@ -13,11 +13,11 @@ export class GoogleUserService {
   ) {}
 
   async googleSignIn(googleTokenDto: GoogleTokenDto) {
-    const { accessToken, refreshToken, idToken } = googleTokenDto;
-    const [payload]: string[] = idToken.split('.');
+    const { access_token, refresh_token, id_token } = googleTokenDto;
+    const [payload]: string[] = id_token.split('.');
 
     // idToken 유효성 검증
-    await this.googleAuthService.validateGoogleIdToken(idToken);
+    await this.googleAuthService.validateGoogleIdToken(id_token);
 
     // sub 비교
     const { sub, email, email_verified, profile } =
@@ -29,7 +29,7 @@ export class GoogleUserService {
     if (sub !== uid) {
       await this.registerUser(
         sub,
-        refreshToken,
+        refresh_token,
         email,
         email_verified,
         profile,
@@ -37,12 +37,12 @@ export class GoogleUserService {
     }
 
     // 로그인 처리
-    return { accessToken, refreshToken, idToken };
+    return { access_token, refresh_token, id_token };
   }
 
   async registerUser(
     sub: string,
-    refreshToken: string,
+    refresh_token: string,
     email: string,
     email_verified: boolean,
     profile: any,
@@ -60,7 +60,7 @@ export class GoogleUserService {
 
     await this.userRepository.insertAccountInfo(
       sub,
-      refreshToken,
+      refresh_token,
       email,
       userProfileEntity,
     );

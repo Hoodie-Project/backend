@@ -20,35 +20,35 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], KakaoTokenDto.prototype, "tokenType", void 0);
+], KakaoTokenDto.prototype, "token_type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], KakaoTokenDto.prototype, "accessToken", void 0);
+], KakaoTokenDto.prototype, "access_token", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], KakaoTokenDto.prototype, "idToken", void 0);
+], KakaoTokenDto.prototype, "id_token", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Number)
-], KakaoTokenDto.prototype, "expiresIn", void 0);
+], KakaoTokenDto.prototype, "expires_in", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], KakaoTokenDto.prototype, "refreshToken", void 0);
+], KakaoTokenDto.prototype, "refresh_token", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], KakaoTokenDto.prototype, "refreshTokenExpiresIn", void 0);
+], KakaoTokenDto.prototype, "refresh_token_expires_in", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsNotEmpty)(),

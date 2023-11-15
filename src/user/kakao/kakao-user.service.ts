@@ -22,20 +22,20 @@ export class KakaoUserService {
    * @returns accessToken, refreshToken, idToken
    */
   async kakaoSignIn(kakaoTokenDto: KakaoTokenDto) {
-    const { accessToken, refreshToken, idToken } = kakaoTokenDto;
+    const { access_token, refresh_token, id_token } = kakaoTokenDto;
 
-    await this.kakaoAuthService.validateKakaoIdToken(idToken);
+    await this.kakaoAuthService.validateKakaoIdToken(id_token);
 
-    const { sub } = await this.getKakaoUserInfo(accessToken);
+    const { sub } = await this.getKakaoUserInfo(access_token);
     const { uid } = await this.userRepository.getUserByUID(sub);
 
     // 회원 가입 처리
     if (uid !== sub) {
-      this.registerUser(accessToken, refreshToken);
+      this.registerUser(access_token, refresh_token);
     }
 
     // 로그인 처리
-    return { accessToken, refreshToken, idToken };
+    return { access_token, refresh_token, id_token };
   }
 
   /**
@@ -44,13 +44,13 @@ export class KakaoUserService {
    * @param uid 회원 번호
    * @returns 응답 코드, 로그아웃된 회원 번호
    */
-  async kakaoSignOut(accessToken: string, uid: string) {
-    if (!accessToken) {
+  async kakaoSignOut(access_token: string, uid: string) {
+    if (!access_token) {
       throw new BadRequestException('No accessToken provided');
     }
 
     const reqHeaders = {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${access_token}`,
     };
 
     const reqBody = {
@@ -106,8 +106,8 @@ export class KakaoUserService {
    * @param accessToken
    * @param refreshToken
    */
-  async registerUser(accessToken: string, refreshToken: string) {
-    const userInfo = await this.getKakaoUserInfo(accessToken);
+  async registerUser(access_token: string, refresh_token: string) {
+    const userInfo = await this.getKakaoUserInfo(access_token);
     const { sub, nickname, picture, email } = userInfo;
 
     const userProfileEntity = await this.userRepository.insertProfileInfo(
@@ -117,7 +117,7 @@ export class KakaoUserService {
 
     await this.userRepository.insertAccountInfo(
       sub,
-      refreshToken,
+      refresh_token,
       email,
       userProfileEntity,
     );

@@ -21,23 +21,23 @@ let GoogleUserService = class GoogleUserService {
         this.commonAuthService = commonAuthService;
     }
     async googleSignIn(googleTokenDto) {
-        const { accessToken, refreshToken, idToken } = googleTokenDto;
-        const [payload] = idToken.split('.');
-        await this.googleAuthService.validateGoogleIdToken(idToken);
+        const { access_token, refresh_token, id_token } = googleTokenDto;
+        const [payload] = id_token.split('.');
+        await this.googleAuthService.validateGoogleIdToken(id_token);
         const { sub, email, email_verified, profile } = await this.commonAuthService.decodePayload(payload);
         const { uid } = await this.userRepository.getUserByUID(sub);
         if (sub !== uid) {
-            await this.registerUser(sub, refreshToken, email, email_verified, profile);
+            await this.registerUser(sub, refresh_token, email, email_verified, profile);
         }
-        return { accessToken, refreshToken, idToken };
+        return { access_token, refresh_token, id_token };
     }
-    async registerUser(sub, refreshToken, email, email_verified, profile) {
+    async registerUser(sub, refresh_token, email, email_verified, profile) {
         const { id, picture } = profile;
         if (email_verified !== true) {
             throw new common_1.UnauthorizedException('Unverified email');
         }
         const userProfileEntity = await this.userRepository.insertProfileInfo(id, picture);
-        await this.userRepository.insertAccountInfo(sub, refreshToken, email, userProfileEntity);
+        await this.userRepository.insertAccountInfo(sub, refresh_token, email, userProfileEntity);
     }
 };
 exports.GoogleUserService = GoogleUserService;
