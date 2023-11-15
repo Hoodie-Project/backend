@@ -16,6 +16,7 @@ async function bootstrap() {
     swagger_1.SwaggerModule.setup('api', app, document);
     app.setGlobalPrefix('api');
     app.enableCors(cors_config_1.corsOption);
+    app.use(cors_config_1.setHeader);
     await app.listen(port);
     logger.log(`Application successfully running on ${process.env.NODE_ENV} PORT ${port}`);
 }
