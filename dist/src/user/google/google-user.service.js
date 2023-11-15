@@ -22,21 +22,18 @@ let GoogleUserService = class GoogleUserService {
     }
     async googleSignIn(googleTokenDto) {
         const { access_token, refresh_token, id_token } = googleTokenDto;
-        const [payload] = id_token.split('.');
-        await this.googleAuthService.validateGoogleIdToken(id_token);
-        const { sub, email, email_verified, profile } = await this.commonAuthService.decodePayload(payload);
-        const { uid } = await this.userRepository.getUserByUID(sub);
-        if (sub !== uid) {
-            await this.registerUser(sub, refresh_token, email, email_verified, profile);
+        const { sub, email, email_verified, picture, name } = await this.googleAuthService.validateGoogleIdToken(id_token);
+        const user = await this.userRepository.getUserByUID(sub);
+        if (user === null) {
+            await this.registerUser(sub, email, email_verified, picture, name, refresh_token);
         }
         return { access_token, refresh_token, id_token };
     }
-    async registerUser(sub, refresh_token, email, email_verified, profile) {
-        const { id, picture } = profile;
+    async registerUser(sub, email, email_verified, picture, name, refresh_token) {
         if (email_verified !== true) {
             throw new common_1.UnauthorizedException('Unverified email');
         }
-        const userProfileEntity = await this.userRepository.insertProfileInfo(id, picture);
+        const userProfileEntity = await this.userRepository.insertProfileInfo(name, picture);
         await this.userRepository.insertAccountInfo(sub, refresh_token, email, userProfileEntity);
     }
 };

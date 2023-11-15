@@ -12,5 +12,5 @@ export declare class GoogleUserService {
         refresh_token: string;
         id_token: string;
     }>;
-    registerUser(sub: string, refresh_token: string, email: string, email_verified: boolean, profile: any): Promise<void>;
+    registerUser(sub: any, email: any, email_verified: any, picture: any, name: any, refresh_token: any): Promise<void>;
 }

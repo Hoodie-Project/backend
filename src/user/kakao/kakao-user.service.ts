@@ -29,9 +29,6 @@ export class KakaoUserService {
     const { sub } = await this.getKakaoUserInfo(access_token);
     const user = await this.userRepository.getUserByUID(sub);
 
-    console.log(user);
-    console.log(sub);
-
     // 회원 가입 처리
     if (user === null) {
       this.registerUser(access_token, refresh_token);

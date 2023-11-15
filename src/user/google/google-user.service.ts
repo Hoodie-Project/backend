@@ -14,25 +14,21 @@ export class GoogleUserService {
 
   async googleSignIn(googleTokenDto: GoogleTokenDto) {
     const { access_token, refresh_token, id_token } = googleTokenDto;
-    const [payload]: string[] = id_token.split('.');
 
     // idToken 유효성 검증
-    await this.googleAuthService.validateGoogleIdToken(id_token);
-
-    // sub 비교
-    const { sub, email, email_verified, profile } =
-      await this.commonAuthService.decodePayload(payload);
-
-    const { uid } = await this.userRepository.getUserByUID(sub);
+    const { sub, email, email_verified, picture, name } =
+      await this.googleAuthService.validateGoogleIdToken(id_token);
+    const user = await this.userRepository.getUserByUID(sub);
 
     // 회원 가입 처리
-    if (sub !== uid) {
+    if (user === null) {
       await this.registerUser(
         sub,
-        refresh_token,
         email,
         email_verified,
-        profile,
+        picture,
+        name,
+        refresh_token,
       );
     }
 
@@ -40,24 +36,15 @@ export class GoogleUserService {
     return { access_token, refresh_token, id_token };
   }
 
-  async registerUser(
-    sub: string,
-    refresh_token: string,
-    email: string,
-    email_verified: boolean,
-    profile: any,
-  ) {
-    const { id, picture } = profile;
-
+  async registerUser(sub, email, email_verified, picture, name, refresh_token) {
     if (email_verified !== true) {
       throw new UnauthorizedException('Unverified email');
     }
 
     const userProfileEntity = await this.userRepository.insertProfileInfo(
-      id,
+      name,
       picture,
     );
-
     await this.userRepository.insertAccountInfo(
       sub,
       refresh_token,

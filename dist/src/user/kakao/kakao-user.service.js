@@ -25,8 +25,6 @@ let KakaoUserService = class KakaoUserService {
         await this.kakaoAuthService.validateKakaoIdToken(id_token);
         const { sub } = await this.getKakaoUserInfo(access_token);
         const user = await this.userRepository.getUserByUID(sub);
-        console.log(user);
-        console.log(sub);
         if (user === null) {
             this.registerUser(access_token, refresh_token);
         }

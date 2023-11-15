@@ -17,10 +17,7 @@ export class CommonAuthService {
     }
 
     if (issuer === 'google') {
-      if (
-        iss !== process.env.GOOGLE_ISSUER ||
-        `https://${process.env.GOOGLE_ISSUER}`
-      ) {
+      if (iss !== process.env.GOOGLE_ISSUER) {
         throw new UnauthorizedException('Wrong google issuer');
       }
       return;
@@ -53,15 +50,15 @@ export class CommonAuthService {
     return;
   }
 
-  // async validateNonce(nonce: string) {
-  //   if (!nonce) {
-  //     throw new UnauthorizedException('Nonce required');
-  //   }
-  //   return;
-  // }
+  async validateNonce(nonce: string) {
+    if (nonce !== process.env.NONCE) {
+      throw new UnauthorizedException('Wrong Nonce value');
+    }
+    return;
+  }
 
-  async validateKid(jwtKeyArr, kid: string) {
-    const publicKey = jwtKeyArr.find((key) => key.kid === kid);
+  async validateKid(publickeyArr, kid: string) {
+    const publicKey = publickeyArr.find((key) => key.kid === kid);
 
     if (publicKey === undefined) {
       throw new InternalServerErrorException('wrong public key');
