@@ -5,30 +5,30 @@ export class KakaoTokenDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  tokenType: string;
+  token_type: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  accessToken: string;
+  access_token: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  idToken: string;
+  id_token: string;
 
   @ApiProperty()
-  expiresIn: number;
+  expires_in: number;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  refreshToken: string;
+  refresh_token: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
-  refreshTokenExpiresIn: number;
+  refresh_token_expires_in: number;
 
   @ApiProperty()
   @IsNotEmpty()
