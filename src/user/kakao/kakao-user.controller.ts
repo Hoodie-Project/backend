@@ -26,6 +26,7 @@ export class KakaoUserController {
   @Post('/signin')
   @UsePipes(ValidationPipe)
   kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenDto) {
+    console.log('connected');
     return this.kakaoUserService.kakaoSignIn(kakaoTokenDto);
   }
 
