@@ -3,7 +3,6 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { decodedPayload } from './type/auth';
 
 @Injectable()
 export class CommonAuthService {

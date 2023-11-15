@@ -22,6 +22,8 @@ async function bootstrap() {
 
   // base API 설정
   app.setGlobalPrefix('api');
+
+  // cors 설정
   app.enableCors(corsOption);
 
   // port 연결
