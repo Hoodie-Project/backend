@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { SwaggerModule } from '@nestjs/swagger';
 import { moduleOptions, swaggerConfig } from 'config/swagger.config';
 import { Logger } from '@nestjs/common';
-import { corsOption } from 'config/cors.config';
+import { corsOption, setHeader } from 'config/cors.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,6 +25,7 @@ async function bootstrap() {
 
   // cors 설정
   app.enableCors(corsOption);
+  app.use(setHeader);
 
   // port 연결
   await app.listen(port);
