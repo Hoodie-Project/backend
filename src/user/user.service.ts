@@ -3,16 +3,19 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserRepository } from '@src/user/common/repository/user.repository';
-import { KakaoTokenDto } from '@src/user/kakao/dto/kakao-token.dto';
+import { UserRepository } from '@src/user/user.repository';
+import { KakaoTokenDto } from '@src/user/dto/request/kakao-token.dto';
 import { KakaoAuthService } from '@src/auth/kakao/kakao-auth.service';
 import axios from 'axios';
-import { AccountStatus } from './types/account-status';
+import { AccountStatus } from '@src/user/types/account-status';
+import { GoogleAuthService } from '@src/auth/google/google-auth.service';
+import { GoogleTokenDto } from './dto/request/google-token.dto';
 
 @Injectable()
-export class KakaoUserService {
+export class UserService {
   constructor(
     private readonly kakaoAuthService: KakaoAuthService,
+    private readonly googleAuthService: GoogleAuthService,
     private userRepository: UserRepository,
   ) {}
 
@@ -31,7 +34,7 @@ export class KakaoUserService {
 
     // 회원 가입 처리
     if (user === null) {
-      this.registerUser(access_token, refresh_token);
+      this.registerKakaoUser(access_token, refresh_token);
     }
 
     // 로그인 처리
@@ -49,7 +52,7 @@ export class KakaoUserService {
       throw new BadRequestException('No accessToken provided');
     }
 
-    const reqHeaders = {
+    const reqHeader = {
       Authorization: `Bearer ${access_token}`,
     };
 
@@ -63,7 +66,7 @@ export class KakaoUserService {
         method: 'POST',
         url: process.env.KAKAO_SIGNOUT_URL,
         timeout: 30000,
-        headers: reqHeaders,
+        headers: reqHeader,
         data: reqBody,
       });
 
@@ -86,14 +89,17 @@ export class KakaoUserService {
       throw new BadRequestException('No accessToken provided');
     }
 
-    const config = {
+    const reqHeader = {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     };
 
     try {
-      const response = await axios.get(process.env.KAKAO_USERINFO_URL, config);
+      const response = await axios.get(
+        process.env.KAKAO_USERINFO_URL,
+        reqHeader,
+      );
       const { sub, nickname, picture, email } = response.data;
       return { sub, nickname, picture, email };
     } catch (error) {
@@ -106,7 +112,7 @@ export class KakaoUserService {
    * @param accessToken
    * @param refreshToken
    */
-  async registerUser(access_token: string, refresh_token: string) {
+  async registerKakaoUser(access_token: string, refresh_token: string) {
     const userInfo = await this.getKakaoUserInfo(access_token);
     const { sub, nickname, picture, email } = userInfo;
 
@@ -115,6 +121,54 @@ export class KakaoUserService {
       picture,
     );
 
+    await this.userRepository.insertAccountInfo(
+      sub,
+      refresh_token,
+      email,
+      userProfileEntity,
+    );
+  }
+
+  async googleSignIn(googleTokenDto: GoogleTokenDto) {
+    const { access_token, refresh_token, id_token } = googleTokenDto;
+
+    // idToken 유효성 검증
+    const { sub, email, email_verified, picture, name } =
+      await this.googleAuthService.validateGoogleIdToken(id_token);
+    const user = await this.userRepository.getUserByUID(sub);
+
+    // 회원 가입 처리
+    if (user === null) {
+      await this.registerGoogleUser(
+        sub,
+        email,
+        email_verified,
+        picture,
+        name,
+        refresh_token,
+      );
+    }
+
+    // 로그인 처리
+    return { access_token, refresh_token, id_token };
+  }
+
+  async registerGoogleUser(
+    sub,
+    email,
+    email_verified,
+    picture,
+    name,
+    refresh_token,
+  ) {
+    if (email_verified !== true) {
+      throw new UnauthorizedException('Unverified email');
+    }
+
+    const userProfileEntity = await this.userRepository.insertProfileInfo(
+      name,
+      picture,
+    );
     await this.userRepository.insertAccountInfo(
       sub,
       refresh_token,
@@ -141,22 +195,6 @@ export class KakaoUserService {
       await this.userRepository.deleteUserByUID(uid);
     }
   }
-
-  // async createUser(testDto: TestDto) {
-  //   const { uid, refreshToken, email, nickname, image } = testDto;
-
-  //   const userProfileEntity = await this.userRepository.insertProfileInfo(
-  //     nickname,
-  //     image,
-  //   );
-
-  //   await this.userRepository.insertAccountInfo(
-  //     uid,
-  //     refreshToken,
-  //     email,
-  //     userProfileEntity,
-  //   );
-  // }
 
   async getUserInfo(uid: string) {
     return await this.userRepository.getUserInfoByUID(uid);

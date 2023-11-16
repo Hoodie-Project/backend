@@ -11,5 +11,5 @@ export const databaseConfig = (configService: ConfigService) => ({
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
   synchronize: configService.get('DB_SYNCHRONIZE'),
   namingStrategy: new SnakeNamingStrategy(),
-  logging: true,
+  logging: process.env.NODE_ENV === 'development',
 });

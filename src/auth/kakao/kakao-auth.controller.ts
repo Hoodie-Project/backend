@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { KakaoAuthService } from '@src/auth/kakao/kakao-auth.service';
 
-@Controller('auth/kakao')
+@Controller('/kakao')
 export class KakaoAuthController {
   constructor(private readonly kakaoAuthService: KakaoAuthService) {}
 
