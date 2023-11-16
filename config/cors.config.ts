@@ -9,7 +9,7 @@ export const corsOption = {
   credentials: true,
 };
 
-export const setHeader = (req, res, next) => {
+export const HeaderOption = (req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', 'https://hoodiev.com');
   res.setHeader(
     'Access-Control-Allow-Methods',
