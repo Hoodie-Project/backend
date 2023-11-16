@@ -13,7 +13,7 @@ export class UserProfileEntity {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar' })
   nickname: string;
 
   @Column({ type: 'varchar' })

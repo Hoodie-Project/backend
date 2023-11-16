@@ -21,7 +21,7 @@ export class UserAccountEntity {
   @Column({ type: 'varchar' })
   refreshToken: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar' })
   email: string;
 
   @Column({
