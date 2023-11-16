@@ -26,6 +26,7 @@ let KakaoUserController = class KakaoUserController {
         };
     }
     kakaoSignIn(kakaoTokenDto) {
+        console.log('connected');
         return this.kakaoUserService.kakaoSignIn(kakaoTokenDto);
     }
     kakaoSignOut(accessToken, uid) {

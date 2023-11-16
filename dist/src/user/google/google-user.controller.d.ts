@@ -4,8 +4,8 @@ export declare class GoogleUserController {
     private googleUserService;
     constructor(googleUserService: GoogleUserService);
     googleSignIn(googleTokenDto: GoogleTokenDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        idToken: string;
+        access_token: string;
+        refresh_token: string;
+        id_token: string;
     }>;
 }

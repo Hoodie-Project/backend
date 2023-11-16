@@ -7,9 +7,9 @@ export declare class KakaoUserController {
         message: string;
     };
     kakaoSignIn(kakaoTokenDto: KakaoTokenDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        idToken: string;
+        access_token: string;
+        refresh_token: string;
+        id_token: string;
     }>;
     kakaoSignOut(accessToken: string, uid: string): Promise<any>;
     updateUser(uid: string, nickname: string): Promise<void>;

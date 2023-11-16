@@ -6,18 +6,18 @@ export declare class KakaoUserService {
     private userRepository;
     constructor(kakaoAuthService: KakaoAuthService, userRepository: UserRepository);
     kakaoSignIn(kakaoTokenDto: KakaoTokenDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        idToken: string;
+        access_token: string;
+        refresh_token: string;
+        id_token: string;
     }>;
-    kakaoSignOut(accessToken: string, uid: string): Promise<any>;
+    kakaoSignOut(access_token: string, uid: string): Promise<any>;
     getKakaoUserInfo(accessToken: string): Promise<{
         sub: any;
         nickname: any;
         picture: any;
         email: any;
     }>;
-    registerUser(accessToken: string, refreshToken: string): Promise<void>;
+    registerUser(access_token: string, refresh_token: string): Promise<void>;
     updateUser(uid: string, nickname: string): Promise<void>;
     deleteUser(uid: string): Promise<void>;
     getUserInfo(uid: string): Promise<import("../common/entity/user-account.entity").UserAccountEntity>;

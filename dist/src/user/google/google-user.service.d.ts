@@ -8,9 +8,9 @@ export declare class GoogleUserService {
     private readonly commonAuthService;
     constructor(userRepository: UserRepository, googleAuthService: GoogleAuthService, commonAuthService: CommonAuthService);
     googleSignIn(googleTokenDto: GoogleTokenDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        idToken: string;
+        access_token: string;
+        refresh_token: string;
+        id_token: string;
     }>;
-    registerUser(sub: string, refreshToken: string, email: string, email_verified: boolean, profile: any): Promise<void>;
+    registerUser(sub: any, email: any, email_verified: any, picture: any, name: any, refresh_token: any): Promise<void>;
 }

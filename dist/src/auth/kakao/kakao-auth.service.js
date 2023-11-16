@@ -32,6 +32,7 @@ let KakaoAuthService = class KakaoAuthService {
         await this.commonAuthService.validateAud(aud);
         await this.commonAuthService.validateExp(exp);
         await this.commonAuthService.validateNonce(nonce);
+        return;
     }
     async validateKakaoSignature(header) {
         if (!header) {

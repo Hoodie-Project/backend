@@ -13,22 +13,22 @@ export class GoogleAuthService {
   async validateGoogleIdToken(idToken: string) {
     const [header, payload]: string[] = idToken.split('.');
     // 페이로드 유효성 검증
-    await this.validateGooglePayload(payload);
+    const validatedPayload = await this.validateGooglePayload(payload);
 
     // 서명 유효성 검증
     await this.validateGoogleSignature(header);
+    return validatedPayload;
   }
 
   async validateGooglePayload(payload: string) {
-    const { iss, aud, exp, nonce } =
+    const { sub, iss, aud, exp, nonce, email, email_verified, picture, name } =
       await this.commonAuthService.decodePayload(payload);
 
     await this.commonAuthService.validateIss(iss);
     await this.commonAuthService.validateAud(aud);
     await this.commonAuthService.validateExp(exp);
     await this.commonAuthService.validateNonce(nonce);
-
-    return;
+    return { sub, email, email_verified, picture, name };
   }
 
   async validateGoogleSignature(header: string) {
@@ -38,6 +38,7 @@ export class GoogleAuthService {
     }
 
     const kid = await this.commonAuthService.decodeHeader(header);
+    const publicKeyArr = await this.getDiscoveryDoc();
 
     if (!googlePublicKey) {
       const publicKeyArr = this.getDiscoveryDoc();

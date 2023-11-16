@@ -15,12 +15,13 @@ let CommonAuthService = class CommonAuthService {
             if (iss !== process.env.KAKAO_ISSUER) {
                 throw new common_1.UnauthorizedException('Wrong kakao issuer');
             }
+            return;
         }
         if (issuer === 'google') {
-            if (iss !== process.env.GOOGLE_ISSUER ||
-                `https://${process.env.GOOGLE_ISSUER}`) {
+            if (iss !== process.env.GOOGLE_ISSUER) {
                 throw new common_1.UnauthorizedException('Wrong google issuer');
             }
+            return;
         }
     }
     async validateAud(aud) {
@@ -29,9 +30,13 @@ let CommonAuthService = class CommonAuthService {
             if (googleAud !== process.env.GOOGLE_CLIENT_ID) {
                 throw new common_1.UnauthorizedException('Wrong google client key');
             }
+            return;
         }
         if (aud === process.env.KAKAO_CLIENT_ID) {
-            throw new common_1.UnauthorizedException('Wrong kakao client key');
+            if (aud !== process.env.KAKAO_CLIENT_ID) {
+                throw new common_1.UnauthorizedException('Wrong kakao client key');
+            }
+            return;
         }
     }
     async validateExp(exp) {
@@ -39,14 +44,16 @@ let CommonAuthService = class CommonAuthService {
         if (exp < currentTimestamp) {
             throw new common_1.UnauthorizedException('Expired IdToken');
         }
+        return;
     }
     async validateNonce(nonce) {
-        if (!nonce) {
-            throw new common_1.UnauthorizedException('Nonce required');
+        if (nonce !== process.env.NONCE) {
+            throw new common_1.UnauthorizedException('Wrong Nonce value');
         }
+        return;
     }
-    async validateKid(jwtKeyArr, kid) {
-        const publicKey = jwtKeyArr.find((key) => key.kid === kid);
+    async validateKid(publickeyArr, kid) {
+        const publicKey = publickeyArr.find((key) => key.kid === kid);
         if (publicKey === undefined) {
             throw new common_1.InternalServerErrorException('wrong public key');
         }

@@ -19,23 +19,24 @@ let GoogleAuthService = class GoogleAuthService {
     }
     async validateGoogleIdToken(idToken) {
         const [header, payload] = idToken.split('.');
-        await this.validateGooglePayload(payload);
+        const validatedPayload = await this.validateGooglePayload(payload);
         await this.validateGoogleSignature(header);
+        return validatedPayload;
     }
     async validateGooglePayload(payload) {
-        const { iss, aud, exp, nonce } = await this.commonAuthService.decodePayload(payload);
+        const { sub, iss, aud, exp, nonce, email, email_verified, picture, name } = await this.commonAuthService.decodePayload(payload);
         await this.commonAuthService.validateIss(iss);
         await this.commonAuthService.validateAud(aud);
         await this.commonAuthService.validateExp(exp);
         await this.commonAuthService.validateNonce(nonce);
-        return;
+        return { sub, email, email_verified, picture, name };
     }
     async validateGoogleSignature(header) {
         if (!header) {
             throw new common_1.BadRequestException('No header provided');
         }
         const kid = await this.commonAuthService.decodeHeader(header);
-        const publicKeyArr = this.getDiscoveryDoc();
+        const publicKeyArr = await this.getDiscoveryDoc();
         const confirmedKey = await this.commonAuthService.validateKid(publicKeyArr, kid);
         return confirmedKey;
     }
