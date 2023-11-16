@@ -32,18 +32,24 @@ export class GoogleAuthService {
   }
 
   async validateGoogleSignature(header: string) {
+    let googlePublicKey: string | null;
     if (!header) {
       throw new BadRequestException('No header provided');
     }
 
     const kid = await this.commonAuthService.decodeHeader(header);
     const publicKeyArr = await this.getDiscoveryDoc();
-    const confirmedKey = await this.commonAuthService.validateKid(
-      publicKeyArr,
-      kid,
-    );
 
-    return confirmedKey;
+    if (!googlePublicKey) {
+      const publicKeyArr = this.getDiscoveryDoc();
+      const googlePublicKey = await this.commonAuthService.validateKid(
+        publicKeyArr,
+        kid,
+      );
+      return googlePublicKey;
+    }
+
+    return googlePublicKey;
   }
 
   async getDiscoveryDoc() {
