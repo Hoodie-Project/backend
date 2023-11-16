@@ -41,24 +41,25 @@ export class KakaoAuthService {
    * @returns
    */
   async validateKakaoSignature(header: string) {
+    let kakaoPublicKey: string | null;
     if (!header) {
       throw new BadRequestException('No header provided');
     }
-
     const kid = await this.commonAuthService.decodeHeader(header);
 
-    // 공개키 캐싱 로직 필요
+    if (!kakaoPublicKey) {
+      const publickeyArr = await this.getKakaoPublicKeys();
+      const kakaoPublicKey = await this.commonAuthService.validateKid(
+        publickeyArr,
+        kid,
+      );
+      return kakaoPublicKey;
+    }
 
-    const publickeyArr = await this.getKakaoPublicKey();
-    const confirmedKey = await this.commonAuthService.validateKid(
-      publickeyArr,
-      kid,
-    );
-
-    return confirmedKey;
+    return kakaoPublicKey;
   }
 
-  async getKakaoPublicKey() {
+  async getKakaoPublicKeys() {
     try {
       const response = await axios.get(process.env.KAKAO_PUBLICKEY_URL);
       const publickeyArr = response.data.keys;
