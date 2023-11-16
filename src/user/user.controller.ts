@@ -9,19 +9,15 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { KakaoUserService } from '@src/user/kakao/kakao-user.service';
-import { KakaoTokenDto } from '@src/user/kakao/dto/kakao-token.dto';
-import {
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-  ApiOkResponse,
-} from '@nestjs/swagger';
+import { UserService } from '@src/user/user.service';
+import { KakaoTokenDto } from '@src/user/dto/request/kakao-token.dto';
+import { ApiOperation, ApiTags, ApiOkResponse } from '@nestjs/swagger';
+import { GoogleTokenDto } from './dto/request/google-token.dto';
 
 @ApiTags('user')
-@Controller('kakao')
-export class KakaoUserController {
-  constructor(private readonly kakaoUserService: KakaoUserService) {}
+@Controller('user')
+export class UserController {
+  constructor(private readonly userService: UserService) {}
 
   @Get('/hello')
   sayHello() {
@@ -35,20 +31,31 @@ export class KakaoUserController {
   @UsePipes(ValidationPipe)
   kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenDto) {
     console.log('connected');
-    return this.kakaoUserService.kakaoSignIn(kakaoTokenDto);
+    return this.userService.kakaoSignIn(kakaoTokenDto);
   }
 
   @Post('/signout')
   @ApiOperation({ summary: '카카오 로그아웃' })
   kakaoSignOut(@Body('accessToken, uid') accessToken: string, uid: string) {
-    return this.kakaoUserService.kakaoSignOut(accessToken, uid);
+    return this.userService.kakaoSignOut(accessToken, uid);
+  }
+
+  @Post('/signin')
+  @ApiOperation({ summary: '구글 로그인' })
+  @ApiOkResponse({
+    description: '구글 로그인 성공',
+    type: GoogleTokenDto,
+  })
+  @UsePipes(ValidationPipe)
+  googleSignIn(@Body() googleTokenDto: GoogleTokenDto) {
+    return this.userService.googleSignIn(googleTokenDto);
   }
 
   @Patch('/:uid')
   @ApiOperation({ summary: '유저 정보 수정' })
   @UsePipes(ValidationPipe)
   updateUser(@Param('uid') uid: string, @Body('nickname') nickname: string) {
-    return this.kakaoUserService.updateUser(uid, nickname);
+    return this.userService.updateUser(uid, nickname);
   }
 
   @Patch('/profile_image/:uid')
@@ -59,14 +66,8 @@ export class KakaoUserController {
   @Delete('/:uid')
   @ApiOperation({ summary: '유저 삭제' })
   deleteUser(@Param('uid') uid: string) {
-    return this.kakaoUserService.deleteUser(uid);
+    return this.userService.deleteUser(uid);
   }
-
-  // @Post()
-  // @UsePipes(ValidationPipe)
-  // createUser(@Body() testDto: TestDto) {
-  //   this.kakaoUserService.createUser(testDto);
-  // }
 
   @Get('/info')
   @ApiOperation({ summary: '유저 정보 조회' })
@@ -75,6 +76,6 @@ export class KakaoUserController {
     type: KakaoTokenDto,
   })
   getUserInfo(@Param('uid') uid: string) {
-    return this.kakaoUserService.getUserInfo(uid);
+    return this.userService.getUserInfo(uid);
   }
 }
