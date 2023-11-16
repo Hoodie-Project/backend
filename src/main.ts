@@ -23,7 +23,7 @@ async function bootstrap() {
   const port = configService.get('PORT') || 8000;
 
   // swagger 연결
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api/docs', app, document);
 
   // base API 설정
   app.setGlobalPrefix('api');
