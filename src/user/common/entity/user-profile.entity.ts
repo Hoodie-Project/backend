@@ -13,16 +13,16 @@ export class UserProfileEntity {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
 
-  @Column()
+  @Column({ type: 'varchar', length: 100 })
   nickname: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   image: string;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @CreateDateColumn({ type: 'date' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp with time zone' })
+  @UpdateDateColumn({ type: 'date' })
   updatedAt: Date;
 
   @OneToOne(() => UserAccountEntity, (account) => account.profile)

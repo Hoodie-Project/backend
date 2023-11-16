@@ -15,22 +15,27 @@ export class UserAccountEntity {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
 
-  @Column()
+  @Column({ type: 'varchar', unique: true })
   uid: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   refreshToken: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 100 })
   email: string;
 
-  @Column({ default: AccountStatus.ACTIVE })
+  @Column({
+    type: 'enum',
+    enum: AccountStatus,
+    enumName: 'AccountStatus',
+    default: AccountStatus.ACTIVE,
+  })
   status: AccountStatus;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @CreateDateColumn({ type: 'date' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp with time zone' })
+  @UpdateDateColumn({ type: 'date' })
   updatedAt: Date;
 
   @OneToOne(() => UserProfileEntity, (profile) => profile.account)
