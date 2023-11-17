@@ -10,52 +10,62 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from '@src/user/user.service';
-import { KakaoTokenDto } from '@src/user/dto/request/kakao-token.dto';
+import { KakaoTokenReqDto } from '@src/user/dto/request/kakao-req.dto';
 import { ApiOperation, ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { GoogleTokenDto } from './dto/request/google-token.dto';
+import { GoogleTokenReqDto } from './dto/request/google-req.dto';
+import {
+  AuthTokenResDto,
+  KakaoSignOutResDto,
+  UserInfoResDto,
+} from './dto/response/response.dto';
+import { KakaoSignOutReqDto } from '@src/user/dto/request/kakao-req.dto';
+import { NicknameReqDto, UidReqDto } from './dto/request/user-req.dto';
+import { AuthToken } from './types/user';
 
 @ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('/hello')
-  sayHello() {
-    return {
-      message: 'hello',
-    };
-  }
-
-  @Post('/signin')
+  @Post('/kakao/signin')
   @ApiOperation({ summary: '카카오 로그인 / 자동 회원가입' })
+  @ApiOkResponse({ description: '카카오 로그인 성공', type: AuthTokenResDto })
   @UsePipes(ValidationPipe)
-  kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenDto) {
-    console.log('connected');
+  kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenReqDto): Promise<AuthToken> {
     return this.userService.kakaoSignIn(kakaoTokenDto);
   }
 
-  @Post('/signout')
+  @Post('/kakao/signout')
   @ApiOperation({ summary: '카카오 로그아웃' })
-  kakaoSignOut(@Body('accessToken, uid') accessToken: string, uid: string) {
-    return this.userService.kakaoSignOut(accessToken, uid);
+  @ApiOkResponse({
+    description: '카카오 로그아웃 성공',
+    type: KakaoSignOutResDto,
+  })
+  kakaoSignOut(@Body() kakaoSignOutDto: KakaoSignOutReqDto): Promise<string> {
+    return this.userService.kakaoSignOut(kakaoSignOutDto);
   }
 
-  @Post('/signin')
+  @Post('/google/signin')
   @ApiOperation({ summary: '구글 로그인' })
-  @ApiOkResponse({
-    description: '구글 로그인 성공',
-    type: GoogleTokenDto,
-  })
+  @ApiOkResponse({ description: '구글 로그인 성공', type: AuthTokenResDto })
   @UsePipes(ValidationPipe)
-  googleSignIn(@Body() googleTokenDto: GoogleTokenDto) {
+  googleSignIn(
+    @Body() googleTokenDto: GoogleTokenReqDto,
+  ): Promise<AuthTokenResDto> {
     return this.userService.googleSignIn(googleTokenDto);
   }
 
+  // 구글 로그아웃
+
   @Patch('/:uid')
   @ApiOperation({ summary: '유저 정보 수정' })
+  @ApiOkResponse({ description: '유저 정보 수정 성공' })
   @UsePipes(ValidationPipe)
-  updateUser(@Param('uid') uid: string, @Body('nickname') nickname: string) {
-    return this.userService.updateUser(uid, nickname);
+  updateUser(
+    @Param() uidDto: UidReqDto,
+    @Body() nicknameDto: NicknameReqDto,
+  ): Promise<void> {
+    return this.userService.updateUser(uidDto, nicknameDto);
   }
 
   @Patch('/profile_image/:uid')
@@ -65,17 +75,15 @@ export class UserController {
 
   @Delete('/:uid')
   @ApiOperation({ summary: '유저 삭제' })
-  deleteUser(@Param('uid') uid: string) {
-    return this.userService.deleteUser(uid);
+  @ApiOkResponse({ description: '유저 삭제 성공' })
+  deleteUser(@Param() uidDto: UidReqDto): Promise<void> {
+    return this.userService.deleteUser(uidDto);
   }
 
   @Get('/info')
   @ApiOperation({ summary: '유저 정보 조회' })
-  @ApiOkResponse({
-    description: '유저 정보 반환',
-    type: KakaoTokenDto,
-  })
-  getUserInfo(@Param('uid') uid: string) {
-    return this.userService.getUserInfo(uid);
+  @ApiOkResponse({ description: '유저 정보 조회 성공', type: UserInfoResDto })
+  getUserInfo(@Param() uidDto: UidReqDto): Promise<UserInfoResDto> {
+    return this.userService.getUserInfo(uidDto);
   }
 }

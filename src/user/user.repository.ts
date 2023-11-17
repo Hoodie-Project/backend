@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { UserProfileEntity } from '@src/user/entity/user-profile.entity';
 import { UserAccountEntity } from '@src/user/entity/user-account.entity';
-import { AccountStatus } from '@src/user/types/account-status';
-
+import { AccountStatus } from '@src/user/types/user';
 @Injectable()
 export class UserRepository {
   private userProfileRepository: Repository<UserProfileEntity>;
@@ -21,7 +20,7 @@ export class UserRepository {
     refreshToken: string,
     email: string,
     profile: UserProfileEntity,
-  ) {
+  ): Promise<void> {
     await this.userAccountRepository.save({
       uid: sub,
       refreshToken,
@@ -30,18 +29,24 @@ export class UserRepository {
     });
   }
 
-  async insertProfileInfo(nickname: string, image: string) {
-    return this.userProfileRepository.save({
+  async insertProfileInfo(
+    nickname: string,
+    image: string,
+  ): Promise<UserProfileEntity> {
+    return await this.userProfileRepository.save({
       nickname,
       image,
     });
   }
 
-  async getUserByUID(uid: string) {
-    return await this.userAccountRepository.findOne({ where: { uid } });
+  async getUserByUID(uid: string): Promise<UserAccountEntity> {
+    return await this.userAccountRepository.findOne({
+      where: { uid },
+      select: ['uid'],
+    });
   }
 
-  async getUserInfoByUID(uid: string) {
+  async getUserInfoByUID(uid: string): Promise<UserAccountEntity> {
     return await this.userAccountRepository.findOne({
       where: { uid },
       relations: {
@@ -50,11 +55,11 @@ export class UserRepository {
     });
   }
 
-  async updateUserInfoByUID(id: number, nickname: string) {
+  async updateUserInfoByUID(id: number, nickname: string): Promise<void> {
     await this.userProfileRepository.update(id, { nickname });
   }
 
-  async deleteUserByUID(uid: string) {
+  async deleteUserByUID(uid: string): Promise<void> {
     await this.userAccountRepository.update(
       { uid: uid },
       {

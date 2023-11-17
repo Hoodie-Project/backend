@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
 
-export class KakaoTokenDto {
+export class KakaoTokenReqDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
@@ -18,6 +18,8 @@ export class KakaoTokenDto {
   id_token: string;
 
   @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
   expires_in: number;
 
   @ApiProperty()
@@ -34,4 +36,9 @@ export class KakaoTokenDto {
   @IsNotEmpty()
   @IsString()
   scope: string;
+}
+
+export class KakaoSignOutReqDto {
+  access_token: string;
+  uid: string;
 }

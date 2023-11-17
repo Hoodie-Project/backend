@@ -4,12 +4,20 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserRepository } from '@src/user/user.repository';
-import { KakaoTokenDto } from '@src/user/dto/request/kakao-token.dto';
+import { KakaoTokenReqDto } from '@src/user/dto/request/kakao-req.dto';
 import { KakaoAuthService } from '@src/auth/kakao/kakao-auth.service';
 import axios from 'axios';
-import { AccountStatus } from '@src/user/types/account-status';
+import {
+  AccountStatus,
+  AuthToken,
+  GoogleUserInfo,
+  KakaoUserInfo,
+} from '@src/user/types/user';
 import { GoogleAuthService } from '@src/auth/google/google-auth.service';
-import { GoogleTokenDto } from './dto/request/google-token.dto';
+import { GoogleTokenReqDto } from './dto/request/google-req.dto';
+import { KakaoSignOutReqDto } from './dto/request/kakao-req.dto';
+import { NicknameReqDto, UidReqDto } from './dto/request/user-req.dto';
+import { UserAccountEntity } from './entity/user-account.entity';
 
 @Injectable()
 export class UserService {
@@ -24,7 +32,7 @@ export class UserService {
    * @param kakaoTokenDto 카카오 요청 토큰 객체
    * @returns accessToken, refreshToken, idToken
    */
-  async kakaoSignIn(kakaoTokenDto: KakaoTokenDto) {
+  async kakaoSignIn(kakaoTokenDto: KakaoTokenReqDto): Promise<AuthToken> {
     const { access_token, refresh_token, id_token } = kakaoTokenDto;
 
     await this.kakaoAuthService.validateKakaoIdToken(id_token);
@@ -38,7 +46,32 @@ export class UserService {
     }
 
     // 로그인 처리
-    return { access_token, refresh_token, id_token };
+    return { access_token, refresh_token };
+  }
+
+  /**
+   * function: 유저 정보 입력 (회원가입)
+   * @param accessToken
+   * @param refreshToken
+   */
+  async registerKakaoUser(
+    access_token: string,
+    refresh_token: string,
+  ): Promise<void> {
+    const { sub, nickname, picture, email }: KakaoUserInfo =
+      await this.getKakaoUserInfo(access_token);
+
+    const userProfileEntity = await this.userRepository.insertProfileInfo(
+      nickname,
+      picture,
+    );
+
+    await this.userRepository.insertAccountInfo(
+      sub,
+      refresh_token,
+      email,
+      userProfileEntity,
+    );
   }
 
   /**
@@ -47,7 +80,8 @@ export class UserService {
    * @param uid 회원 번호
    * @returns 응답 코드, 로그아웃된 회원 번호
    */
-  async kakaoSignOut(access_token: string, uid: string) {
+  async kakaoSignOut(kakaoSignOutDto: KakaoSignOutReqDto): Promise<string> {
+    const { access_token, uid } = kakaoSignOutDto;
     if (!access_token) {
       throw new BadRequestException('No accessToken provided');
     }
@@ -72,7 +106,7 @@ export class UserService {
 
       const { id } = response.data;
 
-      console.log('hello', response);
+      console.log(response);
       return id;
     } catch (error) {
       throw new BadRequestException('Failed to sign out');
@@ -84,14 +118,14 @@ export class UserService {
    * @param accessToken
    * @returns 사용자 정보
    */
-  async getKakaoUserInfo(accessToken: string) {
-    if (!accessToken) {
+  async getKakaoUserInfo(access_token: string): Promise<KakaoUserInfo> {
+    if (!access_token) {
       throw new BadRequestException('No accessToken provided');
     }
 
     const reqHeader = {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${access_token}`,
       },
     };
 
@@ -108,59 +142,32 @@ export class UserService {
   }
 
   /**
-   * function: 유저 정보 입력 (회원가입)
-   * @param accessToken
-   * @param refreshToken
+   * function: 구글 로그인
+   * @param googleTokenDto
+   * @returns
    */
-  async registerKakaoUser(access_token: string, refresh_token: string) {
-    const userInfo = await this.getKakaoUserInfo(access_token);
-    const { sub, nickname, picture, email } = userInfo;
-
-    const userProfileEntity = await this.userRepository.insertProfileInfo(
-      nickname,
-      picture,
-    );
-
-    await this.userRepository.insertAccountInfo(
-      sub,
-      refresh_token,
-      email,
-      userProfileEntity,
-    );
-  }
-
-  async googleSignIn(googleTokenDto: GoogleTokenDto) {
+  async googleSignIn(googleTokenDto: GoogleTokenReqDto): Promise<AuthToken> {
     const { access_token, refresh_token, id_token } = googleTokenDto;
 
     // idToken 유효성 검증
-    const { sub, email, email_verified, picture, name } =
+    const googleUserInfo: GoogleUserInfo =
       await this.googleAuthService.validateGoogleIdToken(id_token);
-    const user = await this.userRepository.getUserByUID(sub);
+    const user = await this.userRepository.getUserByUID(googleUserInfo.sub);
 
     // 회원 가입 처리
     if (user === null) {
-      await this.registerGoogleUser(
-        sub,
-        email,
-        email_verified,
-        picture,
-        name,
-        refresh_token,
-      );
+      await this.registerGoogleUser(googleUserInfo, refresh_token);
     }
 
     // 로그인 처리
-    return { access_token, refresh_token, id_token };
+    return { access_token, refresh_token };
   }
 
   async registerGoogleUser(
-    sub,
-    email,
-    email_verified,
-    picture,
-    name,
-    refresh_token,
-  ) {
+    googleUserInfo: GoogleUserInfo,
+    refresh_token: string,
+  ): Promise<void> {
+    const { sub, email, email_verified, picture, name } = googleUserInfo;
     if (email_verified !== true) {
       throw new UnauthorizedException('Unverified email');
     }
@@ -169,6 +176,7 @@ export class UserService {
       name,
       picture,
     );
+
     await this.userRepository.insertAccountInfo(
       sub,
       refresh_token,
@@ -177,26 +185,32 @@ export class UserService {
     );
   }
 
-  async updateUser(uid: string, nickname: string) {
-    const { status, profile } = await this.userRepository.getUserInfoByUID(uid);
-    const id = profile.id as number;
+  async updateUser(
+    uidDto: UidReqDto,
+    nicknameDto: NicknameReqDto,
+  ): Promise<void> {
+    const { status, profile } = await this.userRepository.getUserInfoByUID(
+      uidDto.uid,
+    );
 
     if (status !== AccountStatus.ACTIVE) {
       throw new UnauthorizedException(`This user is ${status}`);
     }
-    await this.userRepository.updateUserInfoByUID(id, nickname);
+    await this.userRepository.updateUserInfoByUID(
+      profile.id,
+      nicknameDto.nickname,
+    );
   }
 
-  async deleteUser(uid: string) {
-    const user = await this.userRepository.getUserByUID(uid);
-    const existedUID = user.uid;
+  async deleteUser(uidDto: UidReqDto): Promise<void> {
+    const { uid } = await this.userRepository.getUserByUID(uidDto.uid);
 
-    if (uid === existedUID) {
+    if (uid === uidDto.uid) {
       await this.userRepository.deleteUserByUID(uid);
     }
   }
 
-  async getUserInfo(uid: string) {
-    return await this.userRepository.getUserInfoByUID(uid);
+  async getUserInfo(uidDto: UidReqDto): Promise<UserAccountEntity> {
+    return await this.userRepository.getUserInfoByUID(uidDto.uid);
   }
 }
