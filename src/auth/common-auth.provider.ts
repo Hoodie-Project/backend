@@ -3,10 +3,11 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { GoogleIdTokenPayload } from './type/auth';
 
 @Injectable()
 export class CommonAuthService {
-  async validateIss(iss: string) {
+  async validateIss(iss: string): Promise<void> {
     const issuer = iss.split('.')[1];
 
     if (issuer === 'kakao') {
@@ -24,8 +25,8 @@ export class CommonAuthService {
     }
   }
 
-  async validateAud(aud: string) {
-    const googleAud = aud.split('.').reverse[1];
+  async validateAud(aud: string): Promise<void> {
+    const googleAud: string = aud.split('.').reverse[1];
 
     if (googleAud === 'googleusercontent') {
       if (googleAud !== process.env.GOOGLE_CLIENT_ID) {
@@ -42,7 +43,7 @@ export class CommonAuthService {
     }
   }
 
-  async validateExp(exp: number) {
+  async validateExp(exp: number): Promise<void> {
     const currentTimestamp = Math.floor(new Date().getTime() / 1000);
     if (exp < currentTimestamp) {
       throw new UnauthorizedException('Expired IdToken');
@@ -50,7 +51,7 @@ export class CommonAuthService {
     return;
   }
 
-  async validateNonce(nonce: string) {
+  async validateNonce(nonce: string): Promise<void> {
     if (nonce !== process.env.NONCE) {
       throw new UnauthorizedException('Wrong Nonce value');
     }
@@ -66,14 +67,14 @@ export class CommonAuthService {
     return publicKey;
   }
 
-  async decodeHeader(header: string) {
+  async decodeHeader(header: string): Promise<string> {
     const decodedHeader = Buffer.from(header, 'base64').toString('utf-8');
     const { kid } = JSON.parse(decodedHeader);
 
     return kid;
   }
 
-  async decodePayload(payload: string) {
+  async decodePayload(payload: string): Promise<GoogleIdTokenPayload> {
     const decodedPayload = Buffer.from(payload, 'base64').toString('utf-8');
     const parsedDecodedPayload = JSON.parse(decodedPayload);
     return parsedDecodedPayload;

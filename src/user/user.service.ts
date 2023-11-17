@@ -4,8 +4,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserRepository } from '@src/user/user.repository';
+import { AuthService } from '@src/auth/auth.service';
 import { KakaoTokenReqDto } from '@src/user/dto/request/kakao-req.dto';
-import { KakaoAuthService } from '@src/auth/kakao/kakao-auth.service';
 import axios from 'axios';
 import {
   AccountStatus,
@@ -13,7 +13,6 @@ import {
   GoogleUserInfo,
   KakaoUserInfo,
 } from '@src/user/types/user';
-import { GoogleAuthService } from '@src/auth/google/google-auth.service';
 import { GoogleTokenReqDto } from './dto/request/google-req.dto';
 import { KakaoSignOutReqDto } from './dto/request/kakao-req.dto';
 import { NicknameReqDto, UidReqDto } from './dto/request/user-req.dto';
@@ -22,8 +21,7 @@ import { UserAccountEntity } from './entity/user-account.entity';
 @Injectable()
 export class UserService {
   constructor(
-    private readonly kakaoAuthService: KakaoAuthService,
-    private readonly googleAuthService: GoogleAuthService,
+    private readonly authService: AuthService,
     private userRepository: UserRepository,
   ) {}
 
@@ -35,7 +33,7 @@ export class UserService {
   async kakaoSignIn(kakaoTokenDto: KakaoTokenReqDto): Promise<AuthToken> {
     const { access_token, refresh_token, id_token } = kakaoTokenDto;
 
-    await this.kakaoAuthService.validateKakaoIdToken(id_token);
+    await this.authService.validateKakaoIdToken(id_token);
 
     const { sub } = await this.getKakaoUserInfo(access_token);
     const user = await this.userRepository.getUserByUID(sub);
@@ -151,7 +149,7 @@ export class UserService {
 
     // idToken 유효성 검증
     const googleUserInfo: GoogleUserInfo =
-      await this.googleAuthService.validateGoogleIdToken(id_token);
+      await this.authService.validateGoogleIdToken(id_token);
     const user = await this.userRepository.getUserByUID(googleUserInfo.sub);
 
     // 회원 가입 처리
