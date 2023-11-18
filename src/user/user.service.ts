@@ -26,9 +26,9 @@ export class UserService {
   ) {}
 
   /**
-   * function: 카카오톡 OAUTH 메인 로그인
-   * @param kakaoTokenDto 카카오 요청 토큰 객체
-   * @returns accessToken, refreshToken, idToken
+   * function: 카카오톡 OIDC 로그인 & 자동 회원 가입
+   * @param kakaoTokenDto 카카오 요청 토큰 Dto
+   * @returns accessToken, refreshToken
    */
   async kakaoSignIn(kakaoTokenDto: KakaoTokenReqDto): Promise<AuthToken> {
     const { access_token, refresh_token, id_token } = kakaoTokenDto;
@@ -48,7 +48,7 @@ export class UserService {
   }
 
   /**
-   * function: 유저 정보 입력 (회원가입)
+   * function: 카카오 유저 정보 입력
    * @param accessToken
    * @param refreshToken
    */
@@ -76,7 +76,7 @@ export class UserService {
    * function: 카카오 로그아웃
    * @param accessToken
    * @param uid 회원 번호
-   * @returns 응답 코드, 로그아웃된 회원 번호
+   * @returns 로그아웃된 회원 번호
    */
   async kakaoSignOut(kakaoSignOutDto: KakaoSignOutReqDto): Promise<string> {
     const { access_token, uid } = kakaoSignOutDto;
@@ -114,7 +114,7 @@ export class UserService {
   /**
    * function: 사용자 정보 반환
    * @param accessToken
-   * @returns 사용자 정보
+   * @returns 사용자 정보 객체
    */
   async getKakaoUserInfo(access_token: string): Promise<KakaoUserInfo> {
     if (!access_token) {
@@ -141,8 +141,8 @@ export class UserService {
 
   /**
    * function: 구글 로그인
-   * @param googleTokenDto
-   * @returns
+   * @param googleTokenDto 구글 요청 토큰 Dto
+   * @returns access_token, refresh_token
    */
   async googleSignIn(googleTokenDto: GoogleTokenReqDto): Promise<AuthToken> {
     const { access_token, refresh_token, id_token } = googleTokenDto;
@@ -161,6 +161,11 @@ export class UserService {
     return { access_token, refresh_token };
   }
 
+  /**
+   * function: 구글 유저 정보 입력
+   * @param googleUserInfo
+   * @param refresh_token
+   */
   async registerGoogleUser(
     googleUserInfo: GoogleUserInfo,
     refresh_token: string,
@@ -183,6 +188,11 @@ export class UserService {
     );
   }
 
+  /**
+   * function: 유저 정보 슈정
+   * @param uidDto 유저 번호 요청 Dto
+   * @param nicknameDto 닉네임 요청 Dto
+   */
   async updateUser(
     uidDto: UidReqDto,
     nicknameDto: NicknameReqDto,
@@ -200,6 +210,10 @@ export class UserService {
     );
   }
 
+  /**
+   * function: 유저 정보 삭제
+   * @param uidDto 유저 번호 요청 Dto
+   */
   async deleteUser(uidDto: UidReqDto): Promise<void> {
     const { uid } = await this.userRepository.getUserByUID(uidDto.uid);
 
@@ -208,6 +222,11 @@ export class UserService {
     }
   }
 
+  /**
+   * function: 유저 정보 반환
+   * @param uidDto 유저 번호 요청 Dto
+   * @returns 유저 정보 반환
+   */
   async getUserInfo(uidDto: UidReqDto): Promise<UserAccountEntity> {
     return await this.userRepository.getUserInfoByUID(uidDto.uid);
   }
