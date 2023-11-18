@@ -2,20 +2,20 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import axios from 'axios';
 import { CommonAuthService } from '@src/auth/common-auth.provider';
-import {
-  DiscoveryDoc,
-  GoogleIdTokenPayload,
-  IdTokenPayload,
-  JWT,
-} from './type/auth';
+import { GoogleIdTokenPayload, IdTokenPayload, JWT } from './type/auth';
 import { GoogleUserInfo } from '@src/user/types/user';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly commonAuthService: CommonAuthService) {}
+  constructor(
+    private readonly commonAuthService: CommonAuthService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async validateKakaoIdToken(idToken: string): Promise<void> {
     if (!idToken) {
@@ -29,7 +29,7 @@ export class AuthService {
     await this.validateKakaoPayload(payload);
 
     // 서명 유효성 검증
-    await this.validateKakaoSignature(header);
+    await this.validateKakaoSignature(idToken, header);
   }
 
   async validateKakaoPayload(payload: string): Promise<void> {
@@ -47,23 +47,27 @@ export class AuthService {
    * @param {string} header idToken의 헤더
    * @returns
    */
-  async validateKakaoSignature(header: string): Promise<string> {
-    let kakaoPublicKey: string | null;
+  async validateKakaoSignature(idToken: string, header: string): Promise<void> {
     if (!header) {
       throw new BadRequestException('No header provided');
     }
+
+    let kakaoPublicKey: string | null;
     const kid = await this.commonAuthService.decodeHeader(header);
 
     if (!kakaoPublicKey) {
       const publickeyArr = await this.getKakaoPublicKeys();
-      const kakaoPublicKey = await this.commonAuthService.validateKid(
+      kakaoPublicKey = await this.commonAuthService.validateKid(
         publickeyArr,
         kid,
       );
-      return kakaoPublicKey;
     }
 
-    return kakaoPublicKey;
+    try {
+      await this.jwtService.verifyAsync(idToken, { publicKey: kakaoPublicKey });
+    } catch (error) {
+      throw new UnauthorizedException({ message: 'wrong public key' }, error);
+    }
   }
 
   async getKakaoPublicKeys(): Promise<JWT[]> {
@@ -112,7 +116,7 @@ export class AuthService {
       await this.validateGooglePayload(payload);
 
     // 서명 유효성 검증
-    await this.validateGoogleSignature(header);
+    await this.validateGoogleSignature(idToken, header);
     return validatedPayload;
   }
 
@@ -137,24 +141,29 @@ export class AuthService {
     return { sub, email, email_verified, picture, name };
   }
 
-  async validateGoogleSignature(header: string): Promise<string> {
-    let googlePublicKey: string | null;
+  async validateGoogleSignature(idToken: string, header: string) {
     if (!header) {
       throw new BadRequestException('No header provided');
     }
 
+    let googlePublicKey: string | null;
     const kid = await this.commonAuthService.decodeHeader(header);
 
     if (!googlePublicKey) {
       const publicKeyArr: [] = await this.getDiscoveryDoc();
-      const googlePublicKey = await this.commonAuthService.validateKid(
+      googlePublicKey = await this.commonAuthService.validateKid(
         publicKeyArr,
         kid,
       );
-      return googlePublicKey;
     }
 
-    return googlePublicKey;
+    try {
+      await this.jwtService.verifyAsync(idToken, {
+        publicKey: googlePublicKey,
+      });
+    } catch (error) {
+      throw new UnauthorizedException({ message: 'wrong public key' }, error);
+    }
   }
 
   async getDiscoveryDoc(): Promise<[]> {

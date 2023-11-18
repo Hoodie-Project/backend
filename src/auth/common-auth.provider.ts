@@ -3,7 +3,7 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { GoogleIdTokenPayload } from './type/auth';
+import { GoogleIdTokenPayload, JWT } from './type/auth';
 
 @Injectable()
 export class CommonAuthService {
@@ -58,11 +58,11 @@ export class CommonAuthService {
     return;
   }
 
-  async validateKid(publickeyArr, kid: string) {
-    const publicKey = publickeyArr.find((key) => key.kid === kid);
+  async validateKid(publickeyArr: JWT[], kid: string): Promise<string> {
+    const publicKey = publickeyArr.find((key) => key.kid === kid).kid;
 
     if (publicKey === undefined) {
-      throw new InternalServerErrorException('wrong public key');
+      throw new UnauthorizedException('wrong public key');
     }
     return publicKey;
   }

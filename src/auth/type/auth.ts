@@ -42,3 +42,7 @@ export interface DiscoveryDoc {
   claims_supported: [];
   code_challenge_methods_supported: [];
 }
+
+export interface ProcessEnv {
+  [key: string]: string | undefined;
+}
