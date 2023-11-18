@@ -39,6 +39,13 @@ export class KakaoTokenReqDto {
 }
 
 export class KakaoSignOutReqDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
   access_token: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
   uid: string;
 }
