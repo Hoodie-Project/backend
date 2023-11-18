@@ -1,13 +1,29 @@
 import { Module } from '@nestjs/common';
-import { KakaoAuthService } from '@src/auth/kakao/kakao-auth.service';
-import { KakaoAuthController } from '@src/auth/kakao/kakao-auth.controller';
-import { GoogleAuthService } from './google/google-auth.service';
-import { GoogleAuthController } from './google/google.controller';
-import { CommonAuthService } from './common/common-auth.provider';
+import { CommonAuthService } from '@src/auth/common-auth.provider';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
-  controllers: [KakaoAuthController, GoogleAuthController],
-  providers: [KakaoAuthService, GoogleAuthService, CommonAuthService],
-  exports: [KakaoAuthService, GoogleAuthService, CommonAuthService],
+  imports: [
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (
+        configService: ConfigService,
+      ): Promise<JwtModuleOptions> => ({
+        global: true,
+        secret: {
+          kakao: configService.get('KAKAO_SECRET'),
+          google: configService.get('GOOGLE_SECRET'),
+        },
+        signOptions: { expiresIn: '60s' },
+      }),
+      inject: [ConfigService],
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService, CommonAuthService],
+  exports: [AuthService, CommonAuthService],
 })
 export class AuthModule {}

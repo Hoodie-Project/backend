@@ -1,7 +1,7 @@
 import { DocumentBuilder, SwaggerDocumentOptions } from '@nestjs/swagger';
 
 export const swaggerConfig = new DocumentBuilder()
-  .setTitle('Hoodiev: Dev')
+  .setTitle('Hoodiev API')
   .setDescription('hoodiev API documentation')
   .setVersion('0.0.0')
   .addTag('plan')
