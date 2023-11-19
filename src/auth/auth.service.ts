@@ -7,13 +7,17 @@ import {
 import axios from 'axios';
 import { CommonAuthService } from '@src/auth/common-auth.provider';
 import { GoogleIdTokenPayload, IdTokenPayload, JWT } from './type/auth';
-import { GoogleUserInfo } from '@src/user/types/user';
+import { AuthToken, GoogleUserInfo } from '@src/user/types/user';
 import { JwtService } from '@nestjs/jwt';
+import { KakaoGenerateToken } from '@src/user/types/kakao';
+import { AuthRepository } from './auth.repository';
+import { KakaoAccessTokenReqDto } from '@src/user/dto/request/kakao-req.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly commonAuthService: CommonAuthService,
+    private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -208,6 +212,88 @@ export class AuthService {
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to get discovery document',
+      );
+    }
+  }
+
+  async verifyTokenExpiration(accessToken: string, uid: string) {
+    const refreshToken: string = await this.authRepository.getRefreshToken(uid);
+
+    try {
+      await this.jwtService.verifyAsync(accessToken, {
+        secret: process.env.KAKAO_SECRET,
+      });
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        const newTokens = await this.regenerateKakaoTokens(refreshToken);
+        return newTokens;
+      }
+      if (error.name === 'JsonWebTokenError') {
+        throw new UnauthorizedException({
+          name: error.name,
+          message: error.message,
+        });
+      }
+    }
+  }
+
+  async regenerateKakaoTokens(refresh_token: string): Promise<AuthToken> {
+    const reqHeader = {
+      'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+    };
+
+    const reqBody: KakaoGenerateToken = {
+      grant_type: 'refresh_token',
+      client_id: process.env.KAKAO_CLIENT_ID,
+      refresh_token: `${refresh_token}`,
+      client_secret: process.env.KAKAO_SECRET,
+    };
+
+    try {
+      const response = await axios({
+        method: 'POST',
+        url: process.env.KAKAO_GENERATE_TOKEN_URL,
+        timeout: 30000,
+        headers: reqHeader,
+        data: reqBody,
+      });
+
+      const { access_token, refresh_token }: AuthToken = response.data;
+
+      if (!response.data.refresh_token) {
+        return { access_token };
+      }
+
+      return { access_token, refresh_token };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to regenerate kakao tokens',
+      );
+    }
+  }
+
+  async getAccessTokenInfo(access_token: string): Promise<number> {
+    if (!access_token) {
+      throw new BadRequestException('No access token provided');
+    }
+
+    const headers = {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    };
+
+    try {
+      const response = await axios.get(
+        process.env.KAKAO_ACCESSTOKEN_INFO_URL,
+        headers,
+      );
+
+      const { expires_in } = response.data;
+      return expires_in;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to get access token information',
       );
     }
   }

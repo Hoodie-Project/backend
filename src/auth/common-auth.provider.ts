@@ -54,7 +54,7 @@ export class CommonAuthService {
   async validateExp(exp: number): Promise<void> {
     const currentTimestamp = Math.floor(new Date().getTime() / 1000);
     if (exp < currentTimestamp) {
-      throw new UnauthorizedException('Expired IdToken');
+      throw new UnauthorizedException('Expired token');
     }
     return;
   }

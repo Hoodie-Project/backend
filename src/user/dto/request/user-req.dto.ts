@@ -14,3 +14,8 @@ export class NicknameReqDto {
   @IsString()
   nickname: string;
 }
+
+export class TokenReqDto {
+  access_token: string;
+  refresh_token: string;
+}

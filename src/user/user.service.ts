@@ -5,7 +5,10 @@ import {
 } from '@nestjs/common';
 import { UserRepository } from '@src/user/user.repository';
 import { AuthService } from '@src/auth/auth.service';
-import { KakaoTokenReqDto } from '@src/user/dto/request/kakao-req.dto';
+import {
+  KakaoAccessTokenReqDto,
+  KakaoTokenReqDto,
+} from '@src/user/dto/request/kakao-req.dto';
 import axios from 'axios';
 import {
   AccountStatus,
@@ -227,7 +230,14 @@ export class UserService {
    * @param uidDto 유저 번호 요청 Dto
    * @returns 유저 정보 반환
    */
-  async getUserInfo(uidDto: UidReqDto): Promise<UserAccountEntity> {
+  async getUserInfo(
+    uidDto: UidReqDto,
+    accessTokenDto: KakaoAccessTokenReqDto,
+  ): Promise<UserAccountEntity> {
+    await this.authService.verifyTokenExpiration(
+      accessTokenDto.access_token,
+      uidDto.uid,
+    );
     return await this.userRepository.getUserInfoByUID(uidDto.uid);
   }
 }
