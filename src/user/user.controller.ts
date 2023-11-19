@@ -8,6 +8,7 @@ import {
   Delete,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from '@src/user/user.service';
 import {
@@ -30,7 +31,7 @@ import {
 import { KakaoSignOutReqDto } from '@src/user/dto/request/kakao-req.dto';
 import { NicknameReqDto, UidReqDto } from './dto/request/user-req.dto';
 import { AuthToken } from './types/user';
-import { AxiosResponse } from 'axios';
+import { AuthGuard } from '@src/user/auth.guard';
 
 @ApiTags('user')
 @Controller('user')
@@ -110,6 +111,7 @@ export class UserController {
   @ApiOperation({ summary: '유저 정보 조회' })
   @ApiParam({ name: 'uid', type: UidReqDto })
   @ApiOkResponse({ description: '유저 정보 조회 성공', type: UserInfoResDto })
+  @UseGuards(AuthGuard)
   getUserInfo(
     @Param() uidDto: UidReqDto,
     accessTokenDto: KakaoAccessTokenReqDto,

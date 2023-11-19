@@ -18,13 +18,13 @@ import { AuthRepository } from './auth.repository';
           kakao: configService.get('KAKAO_SECRET'),
           google: configService.get('GOOGLE_SECRET'),
         },
-        signOptions: { expiresIn: '60s' },
+        signOptions: { expiresIn: '12h' },
       }),
       inject: [ConfigService],
     }),
   ],
   controllers: [AuthController],
   providers: [AuthService, CommonAuthService, AuthRepository],
-  exports: [AuthService, CommonAuthService],
+  exports: [AuthService, CommonAuthService, JwtModule],
 })
 export class AuthModule {}

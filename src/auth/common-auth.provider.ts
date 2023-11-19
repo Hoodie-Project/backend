@@ -7,21 +7,21 @@ export class CommonAuthService {
    * function: 토큰 issuer 유효성 검증
    * @param iss
    */
-  async validateIss(iss: string): Promise<void> {
+  async validateIss(iss: string): Promise<string> {
     const issuer = iss.split('.')[1];
 
     if (issuer === 'kakao') {
       if (iss !== process.env.KAKAO_ISSUER) {
         throw new UnauthorizedException('Wrong kakao issuer');
       }
-      return;
+      return issuer;
     }
 
     if (issuer === 'google') {
       if (iss !== process.env.GOOGLE_ISSUER) {
         throw new UnauthorizedException('Wrong google issuer');
       }
-      return;
+      return issuer;
     }
   }
 

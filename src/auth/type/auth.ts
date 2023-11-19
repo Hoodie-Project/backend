@@ -46,3 +46,7 @@ export interface DiscoveryDoc {
 export interface ProcessEnv {
   [key: string]: string | undefined;
 }
+
+export interface Secret {
+  issuer: string;
+}

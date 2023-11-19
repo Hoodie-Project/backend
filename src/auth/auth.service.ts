@@ -11,7 +11,6 @@ import { AuthToken, GoogleUserInfo } from '@src/user/types/user';
 import { JwtService } from '@nestjs/jwt';
 import { KakaoGenerateToken } from '@src/user/types/kakao';
 import { AuthRepository } from './auth.repository';
-import { KakaoAccessTokenReqDto } from '@src/user/dto/request/kakao-req.dto';
 
 @Injectable()
 export class AuthService {
