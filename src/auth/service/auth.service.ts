@@ -4,16 +4,26 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import axios from 'axios';
-import { CommonAuthService } from '@src/auth/common-auth.provider';
-import { GoogleIdTokenPayload, IdTokenPayload, JWT } from './type/auth';
-import { GoogleUserInfo } from '@src/user/types/user';
+import axios, { AxiosResponse } from 'axios';
+import { CommonAuthService } from '@src/auth/service/common-auth.provider';
+import {
+  GoogleAccessToken,
+  GoogleIdTokenPayload,
+  IdTokenPayload,
+  JWT,
+  KakaoTokens,
+} from '../types/auth';
+import { AuthToken, GoogleUserInfo } from '@src/user/types/user';
 import { JwtService } from '@nestjs/jwt';
+import { GenerateAuthToken } from '@src/auth/types/auth';
+import { AuthRepository } from '../auth.repository';
+import { GenerateTokenReqDto, UidReqDto } from '@src/auth/dto/request.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly commonAuthService: CommonAuthService,
+    private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -208,6 +218,142 @@ export class AuthService {
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to get discovery document',
+      );
+    }
+  }
+
+  async generateTokens(
+    uidDto: UidReqDto,
+    generateTokenDto: GenerateTokenReqDto,
+  ): Promise<AuthToken | string> {
+    const { issuer, refresh_token } = generateTokenDto;
+
+    const currentRefreshToken = await this.authRepository.getRefreshToken(
+      uidDto.uid,
+    );
+
+    if (refresh_token !== currentRefreshToken) {
+      throw new UnauthorizedException('Unauthorized refresh token');
+    }
+    await this.isKakaoRefreshTokenTampered(refresh_token, uidDto.uid);
+
+    if (issuer === 'kakao') {
+      return await this.regenerateKakaoTokens(refresh_token);
+    }
+
+    if (issuer === 'google') {
+      return await this.regenerateGoogleTokens(refresh_token);
+    }
+  }
+
+  async isKakaoRefreshTokenTampered(
+    refresh_token: string,
+    uid: string,
+  ): Promise<void> {
+    const decodedToken = await this.jwtService.verifyAsync(refresh_token, {
+      secret: process.env.KAKAO_SECRET,
+    });
+
+    const issuedAt = decodedToken.iat * 1000;
+    const currentTime = Date.now();
+    const timeElapsed = currentTime - issuedAt;
+
+    const tokenExpiresIn = parseInt(process.env.KAKAO_REFRESH_TOKEN_EXPIRES_IN);
+
+    if (tokenExpiresIn < timeElapsed) {
+      await this.authRepository.inactivateAccountStatus(uid);
+      throw new UnauthorizedException('Refresh token expired');
+    }
+    return;
+  }
+
+  async regenerateKakaoTokens(
+    refresh_token: string,
+  ): Promise<AuthToken | string> {
+    const reqHeader = {
+      'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+    };
+
+    const reqBody: GenerateAuthToken = {
+      grant_type: 'refresh_token',
+      client_id: process.env.KAKAO_CLIENT_ID,
+      refresh_token: `${refresh_token}`,
+      client_secret: process.env.KAKAO_SECRET,
+    };
+
+    try {
+      const response: AxiosResponse<KakaoTokens> = await axios({
+        method: 'POST',
+        url: process.env.KAKAO_GENERATE_TOKEN_URL,
+        timeout: 30000,
+        headers: reqHeader,
+        data: reqBody,
+      });
+
+      const { access_token, refresh_token } = response.data;
+
+      if (!refresh_token) {
+        return { access_token };
+      }
+
+      return { access_token, refresh_token };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to regenerate kakao tokens',
+      );
+    }
+  }
+
+  async regenerateGoogleTokens(refresh_token: string): Promise<string> {
+    const reqHeader = {
+      'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+    };
+
+    const reqBody: GenerateAuthToken = {
+      grant_type: 'refresh_token',
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      refresh_token: `${refresh_token}`,
+      client_secret: process.env.GOOGLE_SECRET,
+    };
+
+    try {
+      const response: AxiosResponse<GoogleAccessToken> = await axios({
+        method: 'POST',
+        url: process.env.GOOGLE_GENERATE_TOKEN_URL,
+        timeout: 30000,
+        headers: reqHeader,
+        data: reqBody,
+      });
+
+      const { access_token } = response.data;
+      return access_token;
+    } catch (error) {
+      throw new UnauthorizedException('Refresh token expired');
+    }
+  }
+
+  async getAccessTokenInfo(access_token: string): Promise<number> {
+    if (!access_token) {
+      throw new BadRequestException('No access token provided');
+    }
+
+    const headers = {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    };
+
+    try {
+      const response = await axios.get(
+        process.env.KAKAO_ACCESSTOKEN_INFO_URL,
+        headers,
+      );
+
+      const { expires_in } = response.data;
+      return expires_in;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to get access token information',
       );
     }
   }

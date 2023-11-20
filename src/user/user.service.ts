@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserRepository } from '@src/user/user.repository';
-import { AuthService } from '@src/auth/auth.service';
+import { AuthService } from '@src/auth/service/auth.service';
 import { KakaoTokenReqDto } from '@src/user/dto/request/kakao-req.dto';
 import axios from 'axios';
 import {
@@ -40,7 +40,7 @@ export class UserService {
 
     // 회원 가입 처리
     if (user === null) {
-      this.registerKakaoUser(access_token, refresh_token);
+      this.registerKakaoUser(access_token, refresh_token, sub);
     }
 
     // 로그인 처리
@@ -55,9 +55,16 @@ export class UserService {
   async registerKakaoUser(
     access_token: string,
     refresh_token: string,
+    sub: string,
   ): Promise<void> {
-    const { sub, nickname, picture, email }: KakaoUserInfo =
+    const { nickname, picture, email }: KakaoUserInfo =
       await this.getKakaoUserInfo(access_token);
+
+    const { status } = await this.userRepository.getUserInfoByUID(sub);
+
+    if (status === AccountStatus.INACTIVE) {
+      await this.userRepository.activateAccountStatus(sub);
+    }
 
     const userProfileEntity = await this.userRepository.insertProfileInfo(
       nickname,

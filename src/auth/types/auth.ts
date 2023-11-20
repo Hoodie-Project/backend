@@ -43,6 +43,25 @@ export interface DiscoveryDoc {
   code_challenge_methods_supported: [];
 }
 
-export interface ProcessEnv {
-  [key: string]: string | undefined;
+export interface GenerateAuthToken {
+  client_id: string;
+  client_secret: string;
+  grant_type: string;
+  refresh_token: string;
+}
+
+export interface GoogleAccessToken {
+  access_token: string;
+  expires_in: number;
+  scope: string;
+  token_type: string;
+}
+
+export interface KakaoTokens {
+  token_type: string;
+  access_token: string;
+  id_token: string;
+  expires_in: number;
+  refresh_token: string;
+  refresh_token_expires_in: number;
 }

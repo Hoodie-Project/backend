@@ -62,9 +62,14 @@ export class UserRepository {
   async deleteUserByUID(uid: string): Promise<void> {
     await this.userAccountRepository.update(
       { uid: uid },
-      {
-        status: AccountStatus.INACTIVE,
-      },
+      { status: AccountStatus.INACTIVE },
+    );
+  }
+
+  async activateAccountStatus(uid: string): Promise<void> {
+    await this.userAccountRepository.update(
+      { uid: uid },
+      { status: AccountStatus.ACTIVE },
     );
   }
 }
