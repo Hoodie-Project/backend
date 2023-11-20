@@ -11,10 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from '@src/user/user.service';
-import {
-  KakaoAccessTokenReqDto,
-  KakaoTokenReqDto,
-} from '@src/user/dto/request/kakao-req.dto';
+import { KakaoTokenReqDto } from '@src/user/dto/request/kakao-req.dto';
 import {
   ApiOperation,
   ApiTags,
@@ -69,7 +66,7 @@ export class UserController {
   }
 
   @Post('/google/signin')
-  @ApiOperation({ summary: '구글 로그인' })
+  @ApiOperation({ summary: '구글 로그인 / 자동 회원가입' })
   @ApiBody({ description: '구글 토큰 객체', type: GoogleTokenReqDto })
   @ApiOkResponse({
     description: '엑세스 토큰과 리프레시 토큰 반환',
@@ -112,10 +109,7 @@ export class UserController {
   @ApiParam({ name: 'uid', type: UidReqDto })
   @ApiOkResponse({ description: '유저 정보 조회 성공', type: UserInfoResDto })
   @UseGuards(AuthGuard)
-  getUserInfo(
-    @Param() uidDto: UidReqDto,
-    accessTokenDto: KakaoAccessTokenReqDto,
-  ): Promise<UserInfoResDto> {
-    return this.userService.getUserInfo(uidDto, accessTokenDto);
+  getUserInfo(@Param() uidDto: UidReqDto): Promise<UserInfoResDto> {
+    return this.userService.getUserInfo(uidDto);
   }
 }

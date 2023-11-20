@@ -4,13 +4,20 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import axios from 'axios';
-import { CommonAuthService } from '@src/auth/common-auth.provider';
-import { GoogleIdTokenPayload, IdTokenPayload, JWT } from './type/auth';
+import axios, { AxiosResponse } from 'axios';
+import { CommonAuthService } from '@src/auth/service/common-auth.provider';
+import {
+  GoogleAccessToken,
+  GoogleIdTokenPayload,
+  IdTokenPayload,
+  JWT,
+  KakaoTokens,
+} from '../types/auth';
 import { AuthToken, GoogleUserInfo } from '@src/user/types/user';
 import { JwtService } from '@nestjs/jwt';
-import { KakaoGenerateToken } from '@src/user/types/kakao';
-import { AuthRepository } from './auth.repository';
+import { GenerateAuthToken } from '@src/auth/types/auth';
+import { AuthRepository } from '../auth.repository';
+import { GenerateTokenReqDto, UidReqDto } from '@src/auth/dto/request.dto';
 
 @Injectable()
 export class AuthService {
@@ -215,33 +222,59 @@ export class AuthService {
     }
   }
 
-  async verifyTokenExpiration(accessToken: string, uid: string) {
-    const refreshToken: string = await this.authRepository.getRefreshToken(uid);
+  async generateTokens(
+    uidDto: UidReqDto,
+    generateTokenDto: GenerateTokenReqDto,
+  ): Promise<AuthToken | string> {
+    const { issuer, refresh_token } = generateTokenDto;
 
-    try {
-      await this.jwtService.verifyAsync(accessToken, {
-        secret: process.env.KAKAO_SECRET,
-      });
-    } catch (error) {
-      if (error.name === 'TokenExpiredError') {
-        const newTokens = await this.regenerateKakaoTokens(refreshToken);
-        return newTokens;
-      }
-      if (error.name === 'JsonWebTokenError') {
-        throw new UnauthorizedException({
-          name: error.name,
-          message: error.message,
-        });
-      }
+    const currentRefreshToken = await this.authRepository.getRefreshToken(
+      uidDto.uid,
+    );
+
+    if (refresh_token !== currentRefreshToken) {
+      throw new UnauthorizedException('Unauthorized refresh token');
+    }
+    await this.isKakaoRefreshTokenTampered(refresh_token, uidDto.uid);
+
+    if (issuer === 'kakao') {
+      return await this.regenerateKakaoTokens(refresh_token);
+    }
+
+    if (issuer === 'google') {
+      return await this.regenerateGoogleTokens(refresh_token);
     }
   }
 
-  async regenerateKakaoTokens(refresh_token: string): Promise<AuthToken> {
+  async isKakaoRefreshTokenTampered(
+    refresh_token: string,
+    uid: string,
+  ): Promise<void> {
+    const decodedToken = await this.jwtService.verifyAsync(refresh_token, {
+      secret: process.env.KAKAO_SECRET,
+    });
+
+    const issuedAt = decodedToken.iat * 1000;
+    const currentTime = Date.now();
+    const timeElapsed = currentTime - issuedAt;
+
+    const tokenExpiresIn = parseInt(process.env.KAKAO_REFRESH_TOKEN_EXPIRES_IN);
+
+    if (tokenExpiresIn < timeElapsed) {
+      await this.authRepository.inactivateAccountStatus(uid);
+      throw new UnauthorizedException('Refresh token expired');
+    }
+    return;
+  }
+
+  async regenerateKakaoTokens(
+    refresh_token: string,
+  ): Promise<AuthToken | string> {
     const reqHeader = {
       'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
     };
 
-    const reqBody: KakaoGenerateToken = {
+    const reqBody: GenerateAuthToken = {
       grant_type: 'refresh_token',
       client_id: process.env.KAKAO_CLIENT_ID,
       refresh_token: `${refresh_token}`,
@@ -249,7 +282,7 @@ export class AuthService {
     };
 
     try {
-      const response = await axios({
+      const response: AxiosResponse<KakaoTokens> = await axios({
         method: 'POST',
         url: process.env.KAKAO_GENERATE_TOKEN_URL,
         timeout: 30000,
@@ -257,9 +290,9 @@ export class AuthService {
         data: reqBody,
       });
 
-      const { access_token, refresh_token }: AuthToken = response.data;
+      const { access_token, refresh_token } = response.data;
 
-      if (!response.data.refresh_token) {
+      if (!refresh_token) {
         return { access_token };
       }
 
@@ -268,6 +301,34 @@ export class AuthService {
       throw new InternalServerErrorException(
         'Failed to regenerate kakao tokens',
       );
+    }
+  }
+
+  async regenerateGoogleTokens(refresh_token: string): Promise<string> {
+    const reqHeader = {
+      'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+    };
+
+    const reqBody: GenerateAuthToken = {
+      grant_type: 'refresh_token',
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      refresh_token: `${refresh_token}`,
+      client_secret: process.env.GOOGLE_SECRET,
+    };
+
+    try {
+      const response: AxiosResponse<GoogleAccessToken> = await axios({
+        method: 'POST',
+        url: process.env.GOOGLE_GENERATE_TOKEN_URL,
+        timeout: 30000,
+        headers: reqHeader,
+        data: reqBody,
+      });
+
+      const { access_token } = response.data;
+      return access_token;
+    } catch (error) {
+      throw new UnauthorizedException('Refresh token expired');
     }
   }
 
