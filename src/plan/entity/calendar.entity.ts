@@ -5,23 +5,26 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { PlanEntity } from './plan.entity';
+import { PlanRevisionEntity } from './plan-revision.entity';
 
 @Entity()
 export class CalendarEntity {
-  @ApiProperty()
+  @ApiProperty({ type: 'bigint' })
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
 
-  @ApiProperty()
-  @Column()
+  @ApiProperty({ type: 'varchar' })
+  @Column({ type: 'varchar' })
   name: string;
 
   @ApiProperty()
   @Column()
   color: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @Column({ nullable: true })
   description: string;
 
@@ -29,11 +32,19 @@ export class CalendarEntity {
   @Column({ default: true })
   is_default: boolean;
 
-  @ApiProperty()
+  @ApiProperty({ type: 'date' })
   @CreateDateColumn({ type: 'date' })
   createdAt: Date;
 
-  @ApiProperty()
+  @ApiProperty({ type: 'date' })
   @UpdateDateColumn({ type: 'date' })
   updatedAt: Date;
+
+  @ApiProperty({ type: PlanEntity })
+  @OneToMany(() => PlanEntity, (plan) => plan.calendar)
+  plan: PlanEntity[];
+
+  @ApiProperty()
+  @OneToMany(() => PlanRevisionEntity, (planRevision) => planRevision.calendar)
+  planRevision: PlanRevisionEntity[];
 }

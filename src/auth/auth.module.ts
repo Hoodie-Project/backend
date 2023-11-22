@@ -14,10 +14,7 @@ import { AuthRepository } from './auth.repository';
         configService: ConfigService,
       ): Promise<JwtModuleOptions> => ({
         global: true,
-        secret: {
-          kakao: configService.get('KAKAO_SECRET'),
-          google: configService.get('GOOGLE_SECRET'),
-        },
+        secret: configService.get('KAKAO_SECRET'),
         signOptions: { expiresIn: '12h' },
       }),
       inject: [ConfigService],

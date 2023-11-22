@@ -6,7 +6,6 @@ import { UserModule } from '@src/user/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PlanModule } from './plan/plan.module';
-import { PlanModule } from './plan/plan.module';
 
 @Module({
   imports: [
