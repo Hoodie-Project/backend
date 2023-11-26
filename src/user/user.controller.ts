@@ -28,7 +28,7 @@ import {
 import { KakaoSignOutReqDto } from '@src/user/dto/request/kakao-req.dto';
 import { NicknameReqDto, UidReqDto } from './dto/request/user-req.dto';
 import { AuthToken } from './types/user';
-import { AuthGuard } from '@src/user/auth.guard';
+import { AuthGuard } from '@src/guards/auth.guard';
 
 @ApiTags('user')
 @Controller('user')
