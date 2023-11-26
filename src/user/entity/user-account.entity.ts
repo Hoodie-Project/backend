@@ -54,6 +54,6 @@ export class UserAccountEntity {
   profile: UserProfileEntity;
 
   @ApiProperty()
-  @OneToMany(() => PlanEntity, (plan) => plan.user)
+  @OneToMany(() => PlanEntity, (plan) => plan.account)
   plan: PlanEntity[];
 }

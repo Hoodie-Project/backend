@@ -11,7 +11,12 @@ import {
 import { PlanService } from './plan.service';
 import { AuthGuard } from '@src/guards/auth.guard';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
-import { EventIdReqDto, EventReqDto } from './dto/request.dto';
+import {
+  EventIdReqDto,
+  EventReqDto,
+  EventsByMonthReqDto,
+} from './dto/request.dto';
+import { EventResDto } from './dto/response.dto';
 
 @Controller('plan')
 export class PlanController {
@@ -48,11 +53,17 @@ export class PlanController {
   @ApiOperation({})
   @ApiOkResponse()
   @UseGuards(AuthGuard)
-  async getEvent() {}
+  async getEvent(@Param() eventIdReqDto: EventIdReqDto): Promise<EventResDto> {
+    return this.planService.getEvent(eventIdReqDto);
+  }
 
   @Get()
   @ApiOperation({})
   @ApiOkResponse()
   @UseGuards(AuthGuard)
-  async getAllEvents() {}
+  async getEventsByMonth(
+    @Param() eventsByMonthReqDto: EventsByMonthReqDto,
+  ): Promise<EventResDto[]> {
+    return this.planService.getEventsByMonth(eventsByMonthReqDto);
+  }
 }

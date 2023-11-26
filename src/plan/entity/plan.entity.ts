@@ -48,8 +48,8 @@ export class PlanEntity {
   calendar: CalendarEntity[];
 
   @ApiProperty()
-  @ManyToOne(() => UserAccountEntity, (user) => user.plan)
-  user: UserAccountEntity[];
+  @ManyToOne(() => UserAccountEntity, (account) => account.plan)
+  account: UserAccountEntity[];
 
   @ApiProperty()
   @OneToMany(() => RecurrenceEntity, (recurrence) => recurrence.plan)

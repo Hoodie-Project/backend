@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { Between, DataSource, Repository } from 'typeorm';
 import { PlanEntity } from './entity/plan.entity';
 
 @Injectable()
@@ -34,5 +34,22 @@ export class PlanRepository {
 
   async deleteEvent(event_id: number): Promise<void> {
     await this.planRepository.delete({ id: event_id });
+  }
+
+  async getEvent(event_id: number): Promise<PlanEntity> {
+    return await this.planRepository.findOne({ where: { id: event_id } });
+  }
+
+  async getEventsByMonth(
+    uid: string,
+    startDateOfMonth: Date,
+    endDateOfMonth: Date,
+  ): Promise<PlanEntity[]> {
+    return await this.planRepository.find({
+      where: {
+        account: { uid },
+        start_date: Between(startDateOfMonth, endDateOfMonth),
+      },
+    });
   }
 }

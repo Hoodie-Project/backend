@@ -16,6 +16,13 @@ export class NicknameReqDto {
 }
 
 export class TokenReqDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
   access_token: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
   refresh_token: string;
 }

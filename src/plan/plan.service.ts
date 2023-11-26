@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PlanRepository } from './plan.repository';
-import { EventIdReqDto, EventReqDto } from './dto/request.dto';
+import {
+  EventIdReqDto,
+  EventReqDto,
+  EventsByMonthReqDto,
+} from './dto/request.dto';
+import { PlanEntity } from './entity/plan.entity';
 @Injectable()
 export class PlanService {
   constructor(private readonly planRepository: PlanRepository) {}
@@ -33,6 +38,24 @@ export class PlanService {
     return this.planRepository.deleteEvent(parseInt(eventIdDto.event_id));
   }
 
-  async getEvent() {}
-  async getAllEvents() {}
+  async getEvent(eventIdDto: EventIdReqDto): Promise<PlanEntity> {
+    return this.planRepository.getEvent(parseInt(eventIdDto.event_id));
+  }
+
+  async getEventsByMonth(
+    eventsByMonthDto: EventsByMonthReqDto,
+  ): Promise<PlanEntity[]> {
+    const { uid, start_date } = eventsByMonthDto;
+
+    const month = start_date.getMonth() + 1;
+    const year = start_date.getFullYear();
+    const startDateOfMonth = new Date(year, month - 1, 1);
+    const endDateOfMonth = new Date(year, month, 0, 23, 59, 59);
+
+    return this.planRepository.getEventsByMonth(
+      uid,
+      startDateOfMonth,
+      endDateOfMonth,
+    );
+  }
 }

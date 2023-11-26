@@ -26,3 +26,13 @@ export class EventIdReqDto {
   @IsString()
   event_id: string;
 }
+
+export class EventsByMonthReqDto {
+  @ApiProperty()
+  @IsString()
+  uid: string;
+
+  @ApiProperty()
+  @IsDate()
+  start_date: Date;
+}
