@@ -3,7 +3,8 @@ import { PlanRepository } from './plan.repository';
 import {
   EventIdReqDto,
   EventReqDto,
-  EventsByMonthReqDto,
+  StartDateReqDto,
+  UidReqDto,
 } from './dto/request.dto';
 import { PlanEntity } from './entity/plan.entity';
 @Injectable()
@@ -21,8 +22,8 @@ export class PlanService {
   }
 
   async updateEvent(
-    eventDto: EventReqDto,
     eventIdDto: EventIdReqDto,
+    eventDto: EventReqDto,
   ): Promise<void> {
     const { title, content, start_date, end_date } = eventDto;
     return this.planRepository.updateEvent(
@@ -43,9 +44,10 @@ export class PlanService {
   }
 
   async getEventsByMonth(
-    eventsByMonthDto: EventsByMonthReqDto,
+    uidDto: UidReqDto,
+    startDateDto: StartDateReqDto,
   ): Promise<PlanEntity[]> {
-    const { uid, start_date } = eventsByMonthDto;
+    const { start_date } = startDateDto;
 
     const month = start_date.getMonth() + 1;
     const year = start_date.getFullYear();
@@ -53,7 +55,7 @@ export class PlanService {
     const endDateOfMonth = new Date(year, month, 0, 23, 59, 59);
 
     return this.planRepository.getEventsByMonth(
-      uid,
+      uidDto.uid,
       startDateOfMonth,
       endDateOfMonth,
     );
