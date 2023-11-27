@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PlanRepository } from './plan.repository';
 import {
+  CalendarReqDto,
   EventIdReqDto,
   EventReqDto,
   StartDateReqDto,
@@ -11,14 +12,23 @@ import { PlanEntity } from './entity/plan.entity';
 export class PlanService {
   constructor(private readonly planRepository: PlanRepository) {}
 
-  async createEvent(eventDto: EventReqDto): Promise<void> {
+  async createEvent(uidDto: UidReqDto, eventDto: EventReqDto): Promise<void> {
     const { title, content, start_date, end_date } = eventDto;
-    return this.planRepository.insertEvent(
-      title,
-      content,
-      start_date,
-      end_date,
-    );
+
+    const calendar = await this.planRepository.getCalendarByUID(uidDto.uid);
+
+    if (calendar === null) {
+      const defaultCalendar = await this.planRepository.createDefaultCalendar(
+        uidDto.uid,
+      );
+      await this.planRepository.insertEvent(
+        title,
+        content,
+        start_date,
+        end_date,
+        defaultCalendar,
+      );
+    }
   }
 
   async updateEvent(
@@ -59,5 +69,18 @@ export class PlanService {
       startDateOfMonth,
       endDateOfMonth,
     );
+  }
+
+  async createCalendar(
+    uidDto: UidReqDto,
+    calendarDto: CalendarReqDto,
+  ): Promise<void> {
+    const { name, color, description } = calendarDto;
+    const calendar = await this.planRepository.getCalendarByUID(uidDto.uid);
+
+    if (calendar === null) {
+      await this.planRepository.createDefaultCalendar(uidDto.uid);
+    }
+    return await this.planRepository.insertCalendar(name, color, description);
   }
 }

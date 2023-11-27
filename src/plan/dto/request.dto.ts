@@ -38,3 +38,17 @@ export class UidReqDto {
   @IsDate()
   uid: string;
 }
+
+export class CalendarReqDto {
+  @ApiProperty()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @IsString()
+  color: string;
+
+  @ApiProperty()
+  @IsString()
+  description: string;
+}

@@ -6,11 +6,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
 } from 'typeorm';
 import { PlanEntity } from './plan.entity';
 import { PlanRevisionEntity } from './plan-revision.entity';
+import { UserAccountEntity } from '@src/user/entity/user-account.entity';
 
-@Entity()
+@Entity('calendar')
 export class CalendarEntity {
   @ApiProperty({ type: 'bigint' })
   @PrimaryGeneratedColumn({ type: 'bigint' })
@@ -20,8 +22,8 @@ export class CalendarEntity {
   @Column({ type: 'varchar' })
   name: string;
 
-  @ApiProperty()
-  @Column()
+  @ApiProperty({ type: 'varchar' })
+  @Column({ type: 'varchar', length: 100 })
   color: string;
 
   @ApiProperty({ nullable: true })
@@ -40,11 +42,17 @@ export class CalendarEntity {
   @UpdateDateColumn({ type: 'date' })
   updatedAt: Date;
 
-  @ApiProperty({ type: PlanEntity })
+  @ApiProperty()
   @OneToMany(() => PlanEntity, (plan) => plan.calendar)
   plan: PlanEntity[];
 
   @ApiProperty()
   @OneToMany(() => PlanRevisionEntity, (planRevision) => planRevision.calendar)
   planRevision: PlanRevisionEntity[];
+
+  @ApiProperty()
+  @ManyToOne(() => UserAccountEntity, (account) => account.calendar, {
+    lazy: true,
+  })
+  account: Promise<UserAccountEntity>;
 }

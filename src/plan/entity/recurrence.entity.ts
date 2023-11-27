@@ -42,5 +42,5 @@ export class RecurrenceEntity {
 
   @ApiProperty()
   @ManyToOne(() => PlanEntity, (plan) => plan.recurrence)
-  plan: PlanEntity[];
+  plan: PlanEntity;
 }
