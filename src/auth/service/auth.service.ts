@@ -12,10 +12,10 @@ import {
   IdTokenPayload,
   JWT,
   KakaoTokens,
-} from '../types/auth';
-import { AuthToken, GoogleUserInfo } from '@src/user/types/user';
+} from '../../types/auth';
+import { AuthToken, GoogleUserInfo } from '@src/types/user';
 import { JwtService } from '@nestjs/jwt';
-import { GenerateAuthToken } from '@src/auth/types/auth';
+import { GenerateAuthToken } from '@src/types/auth';
 import { AuthRepository } from '../auth.repository';
 import { GenerateTokenReqDto, UidReqDto } from '@src/auth/dto/request.dto';
 

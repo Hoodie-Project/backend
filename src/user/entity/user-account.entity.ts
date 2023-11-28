@@ -9,7 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { UserProfileEntity } from '@src/user/entity/user-profile.entity';
-import { AccountStatus } from '@src/user/types/user';
+import { AccountStatus } from '@src/types/user';
 import { ApiProperty } from '@nestjs/swagger';
 import { PlanEntity } from '@src/plan/entity/plan.entity';
 import { CalendarEntity } from '@src/plan/entity/calendar.entity';

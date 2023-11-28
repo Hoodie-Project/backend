@@ -12,7 +12,7 @@ import {
   AuthToken,
   GoogleUserInfo,
   KakaoUserInfo,
-} from '@src/user/types/user';
+} from '@src/types/user';
 import { GoogleTokenReqDto } from './dto/request/google-req.dto';
 import { KakaoSignOutReqDto } from './dto/request/kakao-req.dto';
 import { NicknameReqDto, UidReqDto } from './dto/request/user-req.dto';
