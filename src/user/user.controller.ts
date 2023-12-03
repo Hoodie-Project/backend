@@ -27,7 +27,7 @@ import {
 } from './dto/response/response.dto';
 import { KakaoSignOutReqDto } from '@src/user/dto/request/kakao-req.dto';
 import { NicknameReqDto, UidReqDto } from './dto/request/user-req.dto';
-import { AuthToken } from '../types/user';
+import { AuthToken, HoodieAuthTokens } from '../types/user';
 import { AuthGuard } from '@src/guards/auth.guard';
 
 @ApiTags('user')
@@ -43,7 +43,9 @@ export class UserController {
     type: AuthTokenResDto,
   })
   @UsePipes(ValidationPipe)
-  kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenReqDto): Promise<AuthToken> {
+  kakaoSignIn(
+    @Body() kakaoTokenDto: KakaoTokenReqDto,
+  ): Promise<HoodieAuthTokens> {
     return this.userService.kakaoSignIn(kakaoTokenDto);
   }
 

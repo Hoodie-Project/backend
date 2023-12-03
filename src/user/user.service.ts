@@ -11,6 +11,7 @@ import {
   AccountStatus,
   AuthToken,
   GoogleUserInfo,
+  HoodieAuthTokens,
   KakaoUserInfo,
 } from '@src/types/user';
 import { GoogleTokenReqDto } from './dto/request/google-req.dto';
@@ -30,7 +31,9 @@ export class UserService {
    * @param kakaoTokenDto 카카오 요청 토큰 Dto
    * @returns accessToken, refreshToken
    */
-  async kakaoSignIn(kakaoTokenDto: KakaoTokenReqDto): Promise<AuthToken> {
+  async kakaoSignIn(
+    kakaoTokenDto: KakaoTokenReqDto,
+  ): Promise<HoodieAuthTokens> {
     const { access_token, refresh_token, id_token } = kakaoTokenDto;
 
     await this.authService.validateKakaoIdToken(id_token);
@@ -38,13 +41,22 @@ export class UserService {
     const { sub } = await this.getKakaoUserInfo(access_token);
     const user = await this.userRepository.getUserByUID(sub);
 
+    // 후디 토큰 발급
+    const { hoodieAccessToken, hoodieRefreshToken } =
+      await this.authService.generateHoodieTokens(sub);
+
     // 회원 가입 처리
     if (user === null) {
-      this.registerKakaoUser(access_token, refresh_token, sub);
+      await this.registerKakaoUser(
+        access_token,
+        refresh_token,
+        hoodieRefreshToken,
+        sub,
+      );
     }
 
     // 로그인 처리
-    return { access_token, refresh_token };
+    return { hoodieAccessToken, hoodieRefreshToken };
   }
 
   /**
@@ -53,12 +65,13 @@ export class UserService {
    * @param refreshToken
    */
   async registerKakaoUser(
-    access_token: string,
-    refresh_token: string,
+    kakaoAccessToken: string,
+    kakaoRefreshToken: string,
+    hoodieRefreshToken: string,
     sub: string,
   ): Promise<void> {
     const { nickname, picture, email }: KakaoUserInfo =
-      await this.getKakaoUserInfo(access_token);
+      await this.getKakaoUserInfo(kakaoAccessToken);
 
     const { status } = await this.userRepository.getUserInfoByUID(sub);
 
@@ -73,7 +86,8 @@ export class UserService {
 
     await this.userRepository.insertAccountInfo(
       sub,
-      refresh_token,
+      kakaoRefreshToken,
+      hoodieRefreshToken,
       email,
       userProfileEntity,
     );
@@ -151,7 +165,9 @@ export class UserService {
    * @param googleTokenDto 구글 요청 토큰 Dto
    * @returns access_token, refresh_token
    */
-  async googleSignIn(googleTokenDto: GoogleTokenReqDto): Promise<AuthToken> {
+  async googleSignIn(
+    googleTokenDto: GoogleTokenReqDto,
+  ): Promise<HoodieAuthTokens> {
     const { access_token, refresh_token, id_token } = googleTokenDto;
 
     // idToken 유효성 검증
@@ -159,13 +175,21 @@ export class UserService {
       await this.authService.validateGoogleIdToken(id_token);
     const user = await this.userRepository.getUserByUID(googleUserInfo.sub);
 
+    // 후디 토큰 발급
+    const { hoodieAccessToken, hoodieRefreshToken } =
+      await this.authService.generateHoodieTokens(googleUserInfo.sub);
+
     // 회원 가입 처리
     if (user === null) {
-      await this.registerGoogleUser(googleUserInfo, refresh_token);
+      await this.registerGoogleUser(
+        googleUserInfo,
+        refresh_token,
+        hoodieRefreshToken,
+      );
     }
 
     // 로그인 처리
-    return { access_token, refresh_token };
+    return { hoodieAccessToken, hoodieRefreshToken };
   }
 
   /**
@@ -175,9 +199,11 @@ export class UserService {
    */
   async registerGoogleUser(
     googleUserInfo: GoogleUserInfo,
-    refresh_token: string,
+    googleRefreshToken: string,
+    hoodieRefreshToken: string,
   ): Promise<void> {
     const { sub, email, email_verified, picture, name } = googleUserInfo;
+
     if (email_verified !== true) {
       throw new UnauthorizedException('Unverified email');
     }
@@ -189,7 +215,8 @@ export class UserService {
 
     await this.userRepository.insertAccountInfo(
       sub,
-      refresh_token,
+      googleRefreshToken,
+      hoodieRefreshToken,
       email,
       userProfileEntity,
     );

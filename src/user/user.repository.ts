@@ -17,13 +17,15 @@ export class UserRepository {
 
   async insertAccountInfo(
     sub: string,
-    refreshToken: string,
+    oauthRefreshToken: string,
+    hoodieRefreshToken: string,
     email: string,
     profile: UserProfileEntity,
   ): Promise<void> {
     await this.userAccountRepository.save({
       uid: sub,
-      refreshToken,
+      oauthRefreshToken,
+      refreshToken: hoodieRefreshToken,
       email,
       profile,
     });

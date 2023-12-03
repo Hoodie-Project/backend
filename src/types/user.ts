@@ -14,6 +14,11 @@ export interface AuthToken {
   refresh_token?: string;
 }
 
+export interface HoodieAuthTokens {
+  hoodieAccessToken: string;
+  hoodieRefreshToken: string;
+}
+
 export interface KakaoUserInfo {
   sub: string;
   nickname: string;

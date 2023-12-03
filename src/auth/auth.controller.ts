@@ -21,11 +21,11 @@ export class AuthController {
     return this.authService.validateKakaoIdToken(idToken);
   }
 
-  @Post()
-  generateAccessToken(
-    @Param() uidDto: UidReqDto,
-    @Body() generateTokenDto: GenerateTokenReqDto,
-  ): Promise<AuthToken | string> {
-    return this.authService.generateTokens(uidDto, generateTokenDto);
-  }
+  // @Post()
+  // generateAccessToken(
+  //   @Param() uidDto: UidReqDto,
+  //   @Body() generateTokenDto: GenerateTokenReqDto,
+  // ): Promise<AuthToken | string> {
+  //   return this.authService.generateHoodieTokens(uidDto, generateTokenDto);
+  // }
 }

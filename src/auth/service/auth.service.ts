@@ -13,7 +13,7 @@ import {
   JWT,
   KakaoTokens,
 } from '../../types/auth';
-import { AuthToken, GoogleUserInfo } from '@src/types/user';
+import { AuthToken, GoogleUserInfo, HoodieAuthTokens } from '@src/types/user';
 import { JwtService } from '@nestjs/jwt';
 import { GenerateAuthToken } from '@src/types/auth';
 import { AuthRepository } from '../auth.repository';
@@ -222,29 +222,50 @@ export class AuthService {
     }
   }
 
-  async generateTokens(
-    uidDto: UidReqDto,
-    generateTokenDto: GenerateTokenReqDto,
-  ): Promise<AuthToken | string> {
-    const { issuer, refresh_token } = generateTokenDto;
-
-    const currentRefreshToken = await this.authRepository.getRefreshToken(
-      uidDto.uid,
+  // * TODO 자사 서비스 토큰 재발급으로 변경
+  async generateHoodieTokens(sub: string): Promise<HoodieAuthTokens> {
+    const hoodieAccessToken = await this.jwtService.signAsync(
+      { sub },
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      },
     );
 
-    if (refresh_token !== currentRefreshToken) {
-      throw new UnauthorizedException('Unauthorized refresh token');
-    }
-    await this.isKakaoRefreshTokenTampered(refresh_token, uidDto.uid);
+    const hoodieRefreshToken = await this.jwtService.signAsync(
+      { sub },
+      {
+        secret: process.env.JWT_REFRESH_SECRET,
+        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+      },
+    );
 
-    if (issuer === 'kakao') {
-      return await this.regenerateKakaoTokens(refresh_token);
-    }
-
-    if (issuer === 'google') {
-      return await this.regenerateGoogleTokens(refresh_token);
-    }
+    return { hoodieAccessToken, hoodieRefreshToken };
   }
+
+  // async generateTokens(
+  //   uidDto: UidReqDto,
+  //   generateTokenDto: GenerateTokenReqDto,
+  // ): Promise<AuthToken | string> {
+  //   const { issuer, refresh_token } = generateTokenDto;
+
+  //   const currentRefreshToken = await this.authRepository.getRefreshToken(
+  //     uidDto.uid,
+  //   );
+
+  //   if (refresh_token !== currentRefreshToken) {
+  //     throw new UnauthorizedException('Unauthorized refresh token');
+  //   }
+  //   await this.isKakaoRefreshTokenTampered(refresh_token, uidDto.uid);
+
+  //   if (issuer === 'kakao') {
+  //     return await this.regenerateKakaoTokens(refresh_token);
+  //   }
+
+  //   if (issuer === 'google') {
+  //     return await this.regenerateGoogleTokens(refresh_token);
+  //   }
+  // }
 
   async isKakaoRefreshTokenTampered(
     refresh_token: string,
