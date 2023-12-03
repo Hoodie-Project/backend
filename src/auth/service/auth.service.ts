@@ -13,11 +13,11 @@ import {
   JWT,
   KakaoTokens,
 } from '../../types/auth';
-import { AuthToken, GoogleUserInfo, HoodieAuthTokens } from '@src/types/user';
+import { AuthToken, GoogleUserInfo } from '@src/types/user';
 import { JwtService } from '@nestjs/jwt';
 import { GenerateAuthToken } from '@src/types/auth';
 import { AuthRepository } from '../auth.repository';
-import { GenerateTokenReqDto, UidReqDto } from '@src/auth/dto/request.dto';
+import { HoodieTokensReqDto, UidReqDto } from '@src/auth/dto/request.dto';
 
 @Injectable()
 export class AuthService {
@@ -223,24 +223,91 @@ export class AuthService {
   }
 
   // * TODO 자사 서비스 토큰 재발급으로 변경
-  async generateHoodieTokens(sub: string): Promise<HoodieAuthTokens> {
-    const hoodieAccessToken = await this.jwtService.signAsync(
-      { sub },
-      {
-        secret: process.env.JWT_SECRET,
-        expiresIn: process.env.JWT_EXPIRES_IN,
-      },
-    );
+  async generateHoodieTokens(sub: string) {
+    const hoodie_access_token = await this.generateHoodieAccessToken(sub);
+    const hoodie_refresh_token = await this.generateHoodieRefreshToken(sub);
 
-    const hoodieRefreshToken = await this.jwtService.signAsync(
-      { sub },
-      {
-        secret: process.env.JWT_REFRESH_SECRET,
-        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
-      },
-    );
+    return { hoodie_access_token, hoodie_refresh_token };
+  }
 
-    return { hoodieAccessToken, hoodieRefreshToken };
+  async generateHoodieAccessToken(sub: string) {
+    try {
+      return await this.jwtService.signAsync(
+        { sub },
+        {
+          secret: process.env.JWT_SECRET,
+          expiresIn: process.env.JWT_EXPIRES_IN,
+        },
+      );
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to generate accessToken');
+    }
+  }
+
+  async generateHoodieRefreshToken(sub: string) {
+    try {
+      return await this.jwtService.signAsync(
+        { sub },
+        {
+          secret: process.env.JWT_REFRESH_SECRET,
+          expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+        },
+      );
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to generate refreshToken');
+    }
+  }
+
+  async reIssueHoodieAccessToken(
+    uidDto: UidReqDto,
+    hoodieTokensDto: HoodieTokensReqDto,
+  ) {
+    const { hoodie_access_token, hoodie_refresh_token } = hoodieTokensDto;
+    const { sub } = await this.jwtService.decode(hoodie_access_token);
+
+    if (sub !== uidDto.uid) {
+      throw new BadRequestException(
+        'UID is not matched. This token might be tampered.',
+      );
+    }
+
+    await this.isRefreshTokenExpired(hoodie_refresh_token, sub);
+
+    const newAccessToken = await this.generateHoodieAccessToken(sub);
+    return newAccessToken;
+  }
+
+  async isRefreshTokenExpired(hoodieRefreshToken: string, sub: string) {
+    const existedRefreshToken = await this.authRepository.getRefreshToken(sub);
+
+    if (hoodieRefreshToken !== existedRefreshToken) {
+      throw new UnauthorizedException('Wrong refreshToken provided');
+    }
+
+    try {
+      const checkRefreshToken = await this.jwtService.verifyAsync(
+        hoodieRefreshToken,
+        {
+          secret: process.env.JWT_SECRET,
+        },
+      );
+
+      return checkRefreshToken;
+    } catch (error) {
+      throw new UnauthorizedException('RefreshToken expired');
+    }
+  }
+
+  async reIssueHoodieRefreshToken(
+    uidDto: UidReqDto,
+    HoodieTokensDto: HoodieTokensReqDto,
+  ) {
+    await this.isRefreshTokenExpired(
+      HoodieTokensDto.hoodie_refresh_token,
+      uidDto.uid,
+    );
+    const newRefreshToken = await this.generateHoodieRefreshToken(uidDto.uid);
+    return newRefreshToken;
   }
 
   // async generateTokens(

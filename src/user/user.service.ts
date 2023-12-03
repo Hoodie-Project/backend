@@ -9,7 +9,6 @@ import { KakaoTokenReqDto } from '@src/user/dto/request/kakao-req.dto';
 import axios from 'axios';
 import {
   AccountStatus,
-  AuthToken,
   GoogleUserInfo,
   HoodieAuthTokens,
   KakaoUserInfo,
@@ -42,7 +41,7 @@ export class UserService {
     const user = await this.userRepository.getUserByUID(sub);
 
     // 후디 토큰 발급
-    const { hoodieAccessToken, hoodieRefreshToken } =
+    const { hoodie_access_token, hoodie_refresh_token } =
       await this.authService.generateHoodieTokens(sub);
 
     // 회원 가입 처리
@@ -50,13 +49,13 @@ export class UserService {
       await this.registerKakaoUser(
         access_token,
         refresh_token,
-        hoodieRefreshToken,
+        hoodie_refresh_token,
         sub,
       );
     }
 
     // 로그인 처리
-    return { hoodieAccessToken, hoodieRefreshToken };
+    return { hoodie_access_token, hoodie_refresh_token };
   }
 
   /**
@@ -168,7 +167,7 @@ export class UserService {
   async googleSignIn(
     googleTokenDto: GoogleTokenReqDto,
   ): Promise<HoodieAuthTokens> {
-    const { access_token, refresh_token, id_token } = googleTokenDto;
+    const { refresh_token, id_token } = googleTokenDto;
 
     // idToken 유효성 검증
     const googleUserInfo: GoogleUserInfo =
@@ -176,7 +175,7 @@ export class UserService {
     const user = await this.userRepository.getUserByUID(googleUserInfo.sub);
 
     // 후디 토큰 발급
-    const { hoodieAccessToken, hoodieRefreshToken } =
+    const { hoodie_access_token, hoodie_refresh_token } =
       await this.authService.generateHoodieTokens(googleUserInfo.sub);
 
     // 회원 가입 처리
@@ -184,12 +183,12 @@ export class UserService {
       await this.registerGoogleUser(
         googleUserInfo,
         refresh_token,
-        hoodieRefreshToken,
+        hoodie_refresh_token,
       );
     }
 
     // 로그인 처리
-    return { hoodieAccessToken, hoodieRefreshToken };
+    return { hoodie_access_token, hoodie_refresh_token };
   }
 
   /**

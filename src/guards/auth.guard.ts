@@ -18,7 +18,7 @@ export class AuthGuard implements CanActivate {
     const accessToken = this.extractTokenFromHeader(headers);
 
     if (accessToken === undefined) {
-      throw new UnauthorizedException('Access token sent by incorrect headers');
+      throw new UnauthorizedException('No accessToken provided');
     }
 
     try {
@@ -26,7 +26,7 @@ export class AuthGuard implements CanActivate {
       request['user'] = payload;
       return true;
     } catch (error) {
-      throw new UnauthorizedException('Unauthorized user');
+      throw new UnauthorizedException('AccessToken expired');
     }
   }
 

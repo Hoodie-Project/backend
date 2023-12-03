@@ -1,6 +1,6 @@
-export interface GenerateTokenReqDto {
-  issuer: string;
-  refresh_token: string;
+export interface HoodieTokensReqDto {
+  hoodie_access_token?: string;
+  hoodie_refresh_token: string;
 }
 
 export interface UidReqDto {
