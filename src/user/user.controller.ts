@@ -27,7 +27,7 @@ import {
 } from './dto/response/response.dto';
 import { KakaoSignOutReqDto } from '@src/user/dto/request/kakao-req.dto';
 import { NicknameReqDto, UidReqDto } from './dto/request/user-req.dto';
-import { AuthToken } from '../types/user';
+import { HoodieAuthTokens } from '../types/user';
 import { AuthGuard } from '@src/guards/auth.guard';
 
 @ApiTags('user')
@@ -43,7 +43,9 @@ export class UserController {
     type: AuthTokenResDto,
   })
   @UsePipes(ValidationPipe)
-  kakaoSignIn(@Body() kakaoTokenDto: KakaoTokenReqDto): Promise<AuthToken> {
+  kakaoSignIn(
+    @Body() kakaoTokenDto: KakaoTokenReqDto,
+  ): Promise<HoodieAuthTokens> {
     return this.userService.kakaoSignIn(kakaoTokenDto);
   }
 
@@ -84,6 +86,7 @@ export class UserController {
   @ApiParam({ name: 'uid', type: UidReqDto })
   @ApiBody({ description: '닉네임', type: NicknameReqDto })
   @ApiOkResponse({ description: '유저 정보 수정 성공' })
+  @UseGuards(AuthGuard)
   @UsePipes(ValidationPipe)
   updateUser(
     @Param() uidDto: UidReqDto,
@@ -94,12 +97,14 @@ export class UserController {
 
   @Patch('/profile_image/:uid')
   @ApiOperation({ summary: '유저 프로필 이미지 수정 (TBD)' })
+  @UseGuards(AuthGuard)
   @UsePipes(ValidationPipe)
   updateUserImage() {}
 
   @Delete('/:uid')
   @ApiOperation({ summary: '유저 삭제' })
   @ApiParam({ name: 'uid', type: UidReqDto })
+  @UseGuards(AuthGuard)
   deleteUser(@Param() uidDto: UidReqDto): Promise<void> {
     return this.userService.deleteUser(uidDto);
   }
