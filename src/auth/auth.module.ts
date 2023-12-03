@@ -10,12 +10,10 @@ import { AuthRepository } from './auth.repository';
   imports: [
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (
-        configService: ConfigService,
-      ): Promise<JwtModuleOptions> => ({
+      useFactory: async (): Promise<JwtModuleOptions> => ({
         global: true,
-        secret: configService.get('KAKAO_SECRET'),
-        signOptions: { expiresIn: '12h' },
+        secret: process.env.JWT_SECRET,
+        signOptions: { expiresIn: process.env.JWT_EXPIRES_IN },
       }),
       inject: [ConfigService],
     }),

@@ -29,6 +29,10 @@ export class UserAccountEntity {
   refreshToken: string;
 
   @ApiProperty({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
+  oauthRefreshToken: string;
+
+  @ApiProperty({ type: 'varchar' })
   @Column({ type: 'varchar' })
   email: string;
 
