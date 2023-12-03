@@ -27,8 +27,8 @@ import {
 } from './dto/response/response.dto';
 import { KakaoSignOutReqDto } from '@src/user/dto/request/kakao-req.dto';
 import { NicknameReqDto, UidReqDto } from './dto/request/user-req.dto';
-import { AuthToken } from './types/user';
-import { AuthGuard } from '@src/user/auth.guard';
+import { AuthToken } from '../types/user';
+import { AuthGuard } from '@src/guards/auth.guard';
 
 @ApiTags('user')
 @Controller('user')
@@ -39,7 +39,7 @@ export class UserController {
   @ApiOperation({ summary: '카카오 로그인 / 자동 회원가입' })
   @ApiBody({ description: '카카오 토큰 객체', type: KakaoTokenReqDto })
   @ApiOkResponse({
-    description: '엑세스토큰과 리프레시 토큰 반환',
+    description: '엑세스 토큰과 리프레시 토큰 반환',
     type: AuthTokenResDto,
   })
   @UsePipes(ValidationPipe)
@@ -104,7 +104,7 @@ export class UserController {
     return this.userService.deleteUser(uidDto);
   }
 
-  @Get('/info')
+  @Get('/info/:uid')
   @ApiOperation({ summary: '유저 정보 조회' })
   @ApiParam({ name: 'uid', type: UidReqDto })
   @ApiOkResponse({ description: '유저 정보 조회 성공', type: UserInfoResDto })

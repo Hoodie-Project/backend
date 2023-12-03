@@ -1,35 +1,38 @@
 import {
-  Column,
   Entity,
+  Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { UserProfileEntity } from '@src/user/entity/user-profile.entity';
-import { AccountStatus } from '@src/user/types/user';
+import { AccountStatus } from '@src/types/user';
 import { ApiProperty } from '@nestjs/swagger';
+import { PlanEntity } from '@src/plan/entity/plan.entity';
+import { CalendarEntity } from '@src/plan/entity/calendar.entity';
 
 @Entity('account')
 export class UserAccountEntity {
-  @ApiProperty()
+  @ApiProperty({ type: 'bigint' })
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: number;
 
-  @ApiProperty()
+  @ApiProperty({ type: 'varchar' })
   @Column({ type: 'varchar', unique: true })
   uid: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: 'varchar' })
   @Column({ type: 'varchar' })
   refreshToken: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: 'varchar' })
   @Column({ type: 'varchar' })
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: 'enum' })
   @Column({
     type: 'enum',
     enum: AccountStatus,
@@ -38,11 +41,11 @@ export class UserAccountEntity {
   })
   status: AccountStatus;
 
-  @ApiProperty()
+  @ApiProperty({ type: 'date' })
   @CreateDateColumn({ type: 'date' })
   createdAt: Date;
 
-  @ApiProperty()
+  @ApiProperty({ type: 'date' })
   @UpdateDateColumn({ type: 'date' })
   updatedAt: Date;
 
@@ -50,4 +53,14 @@ export class UserAccountEntity {
   @OneToOne(() => UserProfileEntity, (profile) => profile.account)
   @JoinColumn()
   profile: UserProfileEntity;
+
+  @ApiProperty()
+  @OneToMany(() => PlanEntity, (plan) => plan.account, { lazy: true })
+  plan: Promise<PlanEntity[]>;
+
+  @ApiProperty()
+  @OneToMany(() => CalendarEntity, (calendar) => calendar.account, {
+    lazy: true,
+  })
+  calendar: Promise<CalendarEntity[]>;
 }
