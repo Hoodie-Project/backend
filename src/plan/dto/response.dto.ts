@@ -26,7 +26,7 @@ export class EventResDto extends PlanEntity {
 
   @ApiProperty()
   @IsNotEmpty()
-  calendar: CalendarEntity[];
+  calendar: CalendarEntity;
 
   @ApiProperty()
   @IsNotEmpty()

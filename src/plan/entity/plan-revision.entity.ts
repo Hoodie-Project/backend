@@ -46,9 +46,9 @@ export class PlanRevisionEntity {
 
   @ApiProperty()
   @ManyToOne(() => PlanEntity, (plan) => plan.planRevision)
-  plan: PlanEntity[];
+  plan: PlanEntity;
 
   @ApiProperty()
   @ManyToOne(() => CalendarEntity, (calendar) => calendar.planRevision)
-  calendar: CalendarEntity[];
+  calendar: CalendarEntity;
 }

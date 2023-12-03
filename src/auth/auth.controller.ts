@@ -9,7 +9,7 @@ import {
 import { AuthService } from '@src/auth/service/auth.service';
 import { UidReqDto } from '@src/auth/dto/request.dto';
 import { GenerateTokenReqDto } from './dto/request.dto';
-import { AuthToken } from '@src/user/types/user';
+import { AuthToken } from '@src/types/user';
 
 @Controller('auth')
 export class AuthController {

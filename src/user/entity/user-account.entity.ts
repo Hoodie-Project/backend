@@ -1,6 +1,6 @@
 import {
-  Column,
   Entity,
+  Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
@@ -9,9 +9,10 @@ import {
   OneToMany,
 } from 'typeorm';
 import { UserProfileEntity } from '@src/user/entity/user-profile.entity';
-import { AccountStatus } from '@src/user/types/user';
+import { AccountStatus } from '@src/types/user';
 import { ApiProperty } from '@nestjs/swagger';
 import { PlanEntity } from '@src/plan/entity/plan.entity';
+import { CalendarEntity } from '@src/plan/entity/calendar.entity';
 
 @Entity('account')
 export class UserAccountEntity {
@@ -54,6 +55,12 @@ export class UserAccountEntity {
   profile: UserProfileEntity;
 
   @ApiProperty()
-  @OneToMany(() => PlanEntity, (plan) => plan.account)
-  plan: PlanEntity[];
+  @OneToMany(() => PlanEntity, (plan) => plan.account, { lazy: true })
+  plan: Promise<PlanEntity[]>;
+
+  @ApiProperty()
+  @OneToMany(() => CalendarEntity, (calendar) => calendar.account, {
+    lazy: true,
+  })
+  calendar: Promise<CalendarEntity[]>;
 }

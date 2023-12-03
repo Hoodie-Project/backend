@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserAccountEntity } from '@src/user/entity/user-account.entity';
 import { UserProfileEntity } from '@src/user/entity/user-profile.entity';
-import { AccountStatus } from '@src/user/types/user';
+import { AccountStatus } from '@src/types/user';
 import { IsString, IsNotEmpty, IsBoolean, IsEnum } from 'class-validator';
 
 export class GoogleUserResDto {

@@ -13,7 +13,7 @@ import { UserAccountEntity } from '@src/user/entity/user-account.entity';
 import { RecurrenceEntity } from './recurrence.entity';
 import { PlanRevisionEntity } from './plan-revision.entity';
 
-@Entity()
+@Entity('plan')
 export class PlanEntity {
   @ApiProperty({ type: 'bigint' })
   @PrimaryGeneratedColumn({ type: 'bigint' })
@@ -45,11 +45,11 @@ export class PlanEntity {
 
   @ApiProperty()
   @ManyToOne(() => CalendarEntity, (calendar) => calendar.plan)
-  calendar: CalendarEntity[];
+  calendar: CalendarEntity;
 
   @ApiProperty()
-  @ManyToOne(() => UserAccountEntity, (account) => account.plan)
-  account: UserAccountEntity[];
+  @ManyToOne(() => UserAccountEntity, (account) => account.plan, { lazy: true })
+  account: Promise<UserAccountEntity>;
 
   @ApiProperty()
   @OneToMany(() => RecurrenceEntity, (recurrence) => recurrence.plan)

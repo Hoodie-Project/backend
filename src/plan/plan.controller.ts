@@ -10,14 +10,9 @@ import {
 } from '@nestjs/common';
 import { PlanService } from './plan.service';
 import { AuthGuard } from '@src/guards/auth.guard';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
-  ApiBody,
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
-  ApiTags,
-} from '@nestjs/swagger';
-import {
+  CalendarReqDto,
   EventIdReqDto,
   EventReqDto,
   StartDateReqDto,
@@ -35,8 +30,11 @@ export class PlanController {
   @ApiBody({ type: EventReqDto })
   @ApiOkResponse({ description: '이벤트 생성 성공' })
   @UseGuards(AuthGuard)
-  async createEvent(@Body() eventReqDto: EventReqDto): Promise<void> {
-    return this.planService.createEvent(eventReqDto);
+  async createEvent(
+    @Param() uidReqDto: UidReqDto,
+    @Body() eventReqDto: EventReqDto,
+  ): Promise<void> {
+    return this.planService.createEvent(uidReqDto, eventReqDto);
   }
 
   @Patch()
@@ -76,5 +74,16 @@ export class PlanController {
     @Body() startDateReqDto: StartDateReqDto,
   ): Promise<EventResDto[]> {
     return this.planService.getEventsByMonth(uidReqDto, startDateReqDto);
+  }
+
+  @Post('/calendar')
+  @ApiOperation({})
+  @ApiOkResponse()
+  @UseGuards(AuthGuard)
+  async createCalendar(
+    @Param() uidReqDto: UidReqDto,
+    @Body() calendarReqDto: CalendarReqDto,
+  ): Promise<void> {
+    return this.planService.createCalendar(uidReqDto, calendarReqDto);
   }
 }
