@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsDate } from 'class-validator';
-import { CalendarEntity } from '../entity/calendar.entity';
-import { PlanRevisionEntity } from '../entity/plan-revision.entity';
-import { PlanEntity } from '../entity/plan.entity';
-import { RecurrenceEntity } from '../entity/recurrence.entity';
+import { CalendarEntity } from '@src/common/entity/calendar.entity';
+import { PlanRevisionEntity } from '@src/common/entity/plan-revision.entity';
+import { PlanEntity } from '@src/common/entity/plan.entity';
+import { RecurrenceEntity } from '@src/common/entity/recurrence.entity';
 
 export class EventResDto extends PlanEntity {
   @ApiProperty()

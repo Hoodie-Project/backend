@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Between, DataSource, Repository } from 'typeorm';
-import { PlanEntity } from './entity/plan.entity';
-import { CalendarEntity } from './entity/calendar.entity';
+import { PlanEntity } from '@src/common/entity/plan.entity';
+import { CalendarEntity } from '@src/common/entity/calendar.entity';
 
 @Injectable()
 export class PlanRepository {

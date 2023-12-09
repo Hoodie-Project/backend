@@ -12,11 +12,11 @@ import {
   GoogleUserInfo,
   HoodieAuthTokens,
   KakaoUserInfo,
-} from '@src/types/user';
-import { GoogleTokenReqDto } from './dto/request/google-req.dto';
-import { KakaoSignOutReqDto } from './dto/request/kakao-req.dto';
-import { NicknameReqDto, UidReqDto } from './dto/request/user-req.dto';
-import { UserAccountEntity } from './entity/user-account.entity';
+} from '@src/common/types/user';
+import { GoogleTokenReqDto } from '@src/user/dto/request/google-req.dto';
+import { KakaoSignOutReqDto } from '@src/user/dto/request/kakao-req.dto';
+import { NicknameReqDto, UidReqDto } from '@src/user/dto/request/user-req.dto';
+import { UserAccountEntity } from '@src/common/entity/user-account.entity';
 
 @Injectable()
 export class UserService {

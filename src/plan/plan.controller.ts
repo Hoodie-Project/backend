@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PlanService } from './plan.service';
-import { AuthGuard } from '@src/guards/auth.guard';
+import { AuthGuard } from '@src/common/guards/auth.guard';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CalendarReqDto,
@@ -17,8 +17,8 @@ import {
   EventReqDto,
   StartDateReqDto,
   UidReqDto,
-} from './dto/request.dto';
-import { EventResDto } from './dto/response.dto';
+} from '@src/plan/dto/request.dto';
+import { EventResDto } from '@src/plan/dto/response.dto';
 
 @ApiTags('plan')
 @Controller('plan')

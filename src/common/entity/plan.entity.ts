@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { CalendarEntity } from './calendar.entity';
-import { UserAccountEntity } from '@src/user/entity/user-account.entity';
+import { UserAccountEntity } from '@src/common/entity/user-account.entity';
 import { RecurrenceEntity } from './recurrence.entity';
 import { PlanRevisionEntity } from './plan-revision.entity';
 

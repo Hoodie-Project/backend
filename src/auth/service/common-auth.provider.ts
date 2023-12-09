@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { GoogleIdTokenPayload, JWT } from '../../types/auth';
+import { GoogleIdTokenPayload, JWT } from '../../common/types/auth';
 
 @Injectable()
 export class CommonAuthService {

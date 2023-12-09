@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { SideBarWidget } from '../../types/plan';
+import { SideBarWidget } from '../types/plan';
 
 @Entity('widget')
 export class WidgetEntity {

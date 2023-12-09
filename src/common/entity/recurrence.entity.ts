@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
 } from 'typeorm';
-import { CycleRecurrence, DayRecurrence } from '../../types/plan';
+import { CycleRecurrence, DayRecurrence } from '../types/plan';
 import { PlanEntity } from './plan.entity';
 
 @Entity('recurrence')
