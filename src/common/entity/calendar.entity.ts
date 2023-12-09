@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { PlanEntity } from './plan.entity';
 import { PlanRevisionEntity } from './plan-revision.entity';
-import { UserAccountEntity } from '@src/user/entity/user-account.entity';
+import { UserAccountEntity } from '@src/common/entity/user-account.entity';
 
 @Entity('calendar')
 export class CalendarEntity {
