@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PlanService } from './plan.service';
-import { AuthGuard } from '@src/common/guards/auth.guard';
+import { AuthGuard } from '@src/common/guard/auth.guard';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CalendarReqDto,

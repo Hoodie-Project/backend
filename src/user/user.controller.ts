@@ -28,7 +28,7 @@ import {
 import { KakaoSignOutReqDto } from '@src/user/dto/request/kakao-req.dto';
 import { NicknameReqDto, UidReqDto } from './dto/request/user-req.dto';
 import { HoodieAuthTokens } from '../common/types/user';
-import { AuthGuard } from '@src/common/guards/auth.guard';
+import { AuthGuard } from '@src/common/guard/auth.guard';
 
 @ApiTags('user')
 @Controller('user')
