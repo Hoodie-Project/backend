@@ -8,11 +8,11 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { UserProfileEntity } from '@src/user/entity/user-profile.entity';
-import { AccountStatus } from '@src/types/user';
+import { UserProfileEntity } from '@src/common/entity/user-profile.entity';
+import { AccountStatus } from '@src/common/types/user';
 import { ApiProperty } from '@nestjs/swagger';
-import { PlanEntity } from '@src/plan/entity/plan.entity';
-import { CalendarEntity } from '@src/plan/entity/calendar.entity';
+import { PlanEntity } from '@src/common/entity/plan.entity';
+import { CalendarEntity } from '@src/common/entity/calendar.entity';
 
 @Entity('account')
 export class UserAccountEntity {

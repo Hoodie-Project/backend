@@ -3,9 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { databaseConfig } from 'config/database.config';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from '@src/user/user.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { PlanModule } from './plan/plan.module';
+import { AppController } from '@src/app.controller';
+import { AppService } from '@src/app.service';
+import { PlanModule } from '@src/plan/plan.module';
 
 @Module({
   imports: [

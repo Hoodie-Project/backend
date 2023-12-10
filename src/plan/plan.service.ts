@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PlanRepository } from './plan.repository';
+import { PlanRepository } from '@src/plan/plan.repository';
 import {
   CalendarReqDto,
   EventIdReqDto,
@@ -7,7 +7,7 @@ import {
   StartDateReqDto,
   UidReqDto,
 } from './dto/request.dto';
-import { PlanEntity } from './entity/plan.entity';
+import { PlanEntity } from '@src/common/entity/plan.entity';
 @Injectable()
 export class PlanService {
   constructor(private readonly planRepository: PlanRepository) {}

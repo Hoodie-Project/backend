@@ -9,7 +9,7 @@ import {
 import { AuthService } from '@src/auth/service/auth.service';
 import { UidReqDto } from '@src/auth/dto/request.dto';
 import { HoodieTokensReqDto } from './dto/request.dto';
-import { HoodieAuthTokens } from '@src/types/user';
+import { HoodieAuthTokens } from '@src/common/types/user';
 
 @Controller('auth')
 export class AuthController {
